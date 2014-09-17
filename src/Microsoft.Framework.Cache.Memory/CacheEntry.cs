@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Framework.Cache.Memory.Infrastructure;
 
 namespace Microsoft.Framework.Cache.Memory
 {
@@ -21,6 +22,7 @@ namespace Microsoft.Framework.Cache.Memory
             Value = value;
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
             LastAccessed = context.CreationTime;
+            ExpirationLink = new BaseExpirationTrigger();
         }
 
         internal CacheAddContext Context { get; private set; }
@@ -35,6 +37,8 @@ namespace Microsoft.Framework.Cache.Memory
 
         internal DateTimeOffset LastAccessed { get; set; }
 
+        internal BaseExpirationTrigger ExpirationLink { get; private set; }
+
         internal bool CheckExpired(DateTimeOffset now)
         {
             return IsExpired || CheckForExpiredTime(now) || CheckForExpiredTriggers();
@@ -48,6 +52,7 @@ namespace Microsoft.Framework.Cache.Memory
                 EvictionReason = reason;
             }
             DetachTriggers();
+            ExpirationLink.Expire();
         }
 
         private bool CheckForExpiredTime(DateTimeOffset now)

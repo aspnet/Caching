@@ -55,8 +55,7 @@ namespace Microsoft.Framework.Cache.Memory
 
         public static bool TryGetValue<T>(this IMemoryCache cache, string key, out T value)
         {
-            object obj = null;
-            if (cache.TryGetValue(key, out obj))
+            if (cache.TryGetValue(key, out object obj))
             {
                 value = (T)obj;
                 return true;
@@ -67,8 +66,7 @@ namespace Microsoft.Framework.Cache.Memory
 
         public static object GetOrAdd(this IMemoryCache cache, string key, object state, Func<ICacheAddContext, object> create)
         {
-            object obj;
-            if (cache.TryGetValue(key, out obj))
+            if (cache.TryGetValue(key, out var obj))
             {
                 return obj;
             }
@@ -77,8 +75,7 @@ namespace Microsoft.Framework.Cache.Memory
 
         public static T GetOrAdd<T>(this IMemoryCache cache, string key, Func<ICacheAddContext, T> create)
         {
-            T obj;
-            if (cache.TryGetValue(key, out obj))
+            if (cache.TryGetValue(key, out T obj))
             {
                 return obj;
             }
@@ -87,12 +84,20 @@ namespace Microsoft.Framework.Cache.Memory
 
         public static T GetOrAdd<T>(this IMemoryCache cache, string key, object state, Func<ICacheAddContext, T> create)
         {
-            T obj;
-            if (cache.TryGetValue(key, out obj))
+            if (cache.TryGetValue(key, out T obj))
             {
                 return obj;
             }
             return cache.Set(key, state, create);
+        }
+
+        public static object GetOrAddAndLink(this IMemoryCache cache, string key, object state, Func<ICacheAddContext, object> create, out IExpirationTrigger link)
+        {
+            if (cache.TryGetValueAndLink(key, out var result, out link))
+            {
+                return result;
+            }
+            return cache.SetAndLink(key, state, create, out link);
         }
     }
 }
