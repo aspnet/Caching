@@ -90,6 +90,25 @@ namespace MemoryCacheSample
                 context.AddExpirationTrigger(new CancellationTokenTrigger(cts.Token));
                 return new object();
             });
+
+            // Remove when dependent entry is removed
+            result = cache.GetOrAdd(key, context =>
+            {
+                var intermediate1 = cache.GetOrAddAndLink("otherKey1", state, subContext =>
+                {
+                    return newObject;
+                }, out var keyTrigger1);
+                context.AddExpirationTrigger(keyTrigger1);
+
+                var intermediate2 = cache.GetOrAddAndLink("otherKey2", state, subContext =>
+                {
+                    return newObject;
+                }, out var keyTrigger2);
+                context.AddExpirationTrigger(keyTrigger2);
+
+                // Create an aggregate value
+                return intermediate1.ToString() + intermediate2.ToString() + ";Extra data";
+            });
         }
     }
 }
