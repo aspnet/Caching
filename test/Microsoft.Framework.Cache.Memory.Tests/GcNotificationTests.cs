@@ -9,6 +9,8 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
 {
     public class GcNotificationTests
     {
+        public static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(1);
+
         [Fact]
         public void CallbackRegisteredAndInvoked()
         {
@@ -20,7 +22,7 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
             }, null);
 
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-            Assert.True(callbackInvoked.WaitOne(100));
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout));
         }
 
         [Fact]
@@ -40,20 +42,20 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
             }, null);
 
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-            Assert.True(callbackInvoked.WaitOne(100));
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout));
             Assert.Equal(1, callbackCount);
 
             callbackInvoked.Reset();
 
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-            Assert.True(callbackInvoked.WaitOne(100));
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout));
             Assert.Equal(2, callbackCount);
 
             callbackInvoked.Reset();
 
             // No callback expected the 3rd time
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-            Assert.False(callbackInvoked.WaitOne(100));
+            Assert.False(callbackInvoked.WaitOne(CallbackTimeout));
             Assert.Equal(2, callbackCount);
         }
     }

@@ -10,6 +10,8 @@ namespace Microsoft.Framework.Cache.Memory
 {
     public class TimeExpirationTests
     {
+        public static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(1);
+
         [Fact]
         public void AbsoluteExpirationInThePastNotAdded()
         {
@@ -85,7 +87,7 @@ namespace Microsoft.Framework.Cache.Memory
             clock.Add(TimeSpan.FromMinutes(2));
             var ignored = cache.Get("otherKey"); // Background expiration checks are triggered by misc cache activity.
 
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
 
             found = cache.TryGetValue(key, out result);
             Assert.False(found);

@@ -55,7 +55,7 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
         public void Fire()
         {
             IsExpired = true;
-            if (Registration != null && !Registration.Disposed)
+            if (Registration != null && !Registration.Disposed.WaitOne(0))
             {
                 Registration.RegisteredCallback(Registration.RegisteredState);
             }

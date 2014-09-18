@@ -16,13 +16,13 @@ namespace Microsoft.Framework.Cache.Memory
 
         private readonly Action<CacheEntry> _notifyCacheOfExpiration;
         
-        internal CacheEntry(CacheAddContext context, object value, Action<CacheEntry> notifyCacheOfExpiration)
+        internal CacheEntry(CacheAddContext context, object value, Action<CacheEntry> notifyCacheOfExpiration, ISystemClock clock)
         {
             Context = context;
             Value = value;
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
             LastAccessed = context.CreationTime;
-            ExpirationLink = new BaseExpirationTrigger();
+            ExpirationLink = new LinkedExpirationTrigger(this, clock);
         }
 
         internal CacheAddContext Context { get; private set; }
@@ -127,12 +127,18 @@ namespace Microsoft.Framework.Cache.Memory
             var registrations = TriggerRegistrations;
             if (registrations != null)
             {
-                TriggerRegistrations = null;
-                for (int i = 0; i < registrations.Count; i++)
-                {
-                    var registration = registrations[i];
-                    registration.Dispose();
-                }
+                // This needs to happen outside of the cache read/write lock because the registration removal may invoke arbitrary user code.
+                ThreadPool.QueueUserWorkItem(CacheEntry.DetachTriggers, registrations);
+            }
+        }
+
+        private static void DetachTriggers(object state)
+        {
+            var registrations = (IList<IDisposable>)state;
+            for (int i = 0; i < registrations.Count; i++)
+            {
+                var registration = registrations[i];
+                registration.Dispose();
             }
         }
 

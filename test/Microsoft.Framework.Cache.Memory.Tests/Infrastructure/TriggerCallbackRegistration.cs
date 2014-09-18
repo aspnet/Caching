@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 
 namespace Microsoft.Framework.Cache.Memory.Infrastructure
 {
@@ -11,11 +12,11 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
 
         public object RegisteredState { get; set; }
 
-        public bool Disposed { get; set; }
+        public ManualResetEvent Disposed { get; set; } = new ManualResetEvent(false);
 
         public void Dispose()
         {
-            Disposed = true;
+            Disposed.Set();
         }
     }
 }

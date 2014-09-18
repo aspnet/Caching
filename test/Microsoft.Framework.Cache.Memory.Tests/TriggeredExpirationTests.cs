@@ -10,10 +10,12 @@ namespace Microsoft.Framework.Cache.Memory
 {
     public class TriggeredExpirationTests
     {
+        public static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(1);
+
         [Fact]
         public void SetWithTriggerRegistersForNotificaiton()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = true };
@@ -28,13 +30,13 @@ namespace Microsoft.Framework.Cache.Memory
             Assert.NotNull(trigger.Registration);
             Assert.NotNull(trigger.Registration.RegisteredCallback);
             Assert.NotNull(trigger.Registration.RegisteredState);
-            Assert.False(trigger.Registration.Disposed);
+            Assert.False(trigger.Registration.Disposed.WaitOne(CallbackTimeout));
         }
 
         [Fact]
         public void SetWithLazyTriggerDoesntRegisterForNotification()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = false };
@@ -52,7 +54,7 @@ namespace Microsoft.Framework.Cache.Memory
         [Fact]
         public void FireTriggerRemovesItem()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var callbackInvoked = new ManualResetEvent(false);
@@ -74,13 +76,13 @@ namespace Microsoft.Framework.Cache.Memory
             var found = cache.TryGetValue(key, out obj);
             Assert.False(found);
 
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
         }
 
         [Fact]
         public void ExpiredLazyTriggerRemovesItemOnNextAccess()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var callbackInvoked = new ManualResetEvent(false);
@@ -104,7 +106,7 @@ namespace Microsoft.Framework.Cache.Memory
             found = cache.TryGetValue(key, out obj);
             Assert.False(found);
 
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
         }
 
         [Fact]
@@ -133,7 +135,7 @@ namespace Microsoft.Framework.Cache.Memory
             clock.Add(TimeSpan.FromMinutes(2));
             trigger.IsExpired = true;
             var ignored = cache.Get("otherKey"); // Background expiration checks are triggered by misc cache activity.
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
 
             found = cache.TryGetValue(key, out obj);
             Assert.False(found);
@@ -142,7 +144,7 @@ namespace Microsoft.Framework.Cache.Memory
         [Fact]
         public void RemoveItemDisposesTriggerRegistration()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var callbackInvoked = new ManualResetEvent(false);
@@ -161,14 +163,14 @@ namespace Microsoft.Framework.Cache.Memory
             cache.Remove(key);
 
             Assert.NotNull(trigger.Registration);
-            Assert.True(trigger.Registration.Disposed);
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(trigger.Registration.Disposed.WaitOne(CallbackTimeout));
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
         }
 
         [Fact]
         public void AddExpiredTriggerPreventsCaching()
         {
-            var cache = new MemoryCache();
+            var cache = new MemoryCache(new TestClock(), listenForMemoryPressure: false);
             string key = "myKey";
             var obj = new object();
             var callbackInvoked = new ManualResetEvent(false);
@@ -189,7 +191,7 @@ namespace Microsoft.Framework.Cache.Memory
             Assert.True(trigger.IsExpiredWasCalled);
             Assert.False(trigger.ActiveExpirationCallbacksWasCalled);
             Assert.Null(trigger.Registration);
-            Assert.True(callbackInvoked.WaitOne(100), "Callback");
+            Assert.True(callbackInvoked.WaitOne(CallbackTimeout), "Callback");
 
             result = cache.Get(key);
             Assert.Null(result); // It wasn't cached

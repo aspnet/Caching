@@ -16,7 +16,7 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
         {
         }
 
-        protected BaseExpirationTrigger(bool supportsActiveExpirationCallbacks)
+        public BaseExpirationTrigger(bool supportsActiveExpirationCallbacks)
         {
             ActiveExpirationCallbacks = supportsActiveExpirationCallbacks;
         }
@@ -36,7 +36,7 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
             }
         }
 
-        protected bool CheckIsExpired()
+        protected virtual bool CheckIsExpired()
         {
             return _registrations.Token.IsCancellationRequested;
         }
@@ -50,7 +50,15 @@ namespace Microsoft.Framework.Cache.Memory.Infrastructure
         private static void InvokeCallbacks(object state)
         {
             var _registrations = (CancellationTokenSource)state;
-            _registrations.Cancel();
+            try
+            {
+                _registrations.Cancel(throwOnFirstException: false);
+            }
+            catch (Exception)
+            {
+                // This is a threadpool thread, don't throw.
+                // TODO: log
+            }
         }
 
         public IDisposable RegisterExpirationCallback(Action<object> callback, object state)

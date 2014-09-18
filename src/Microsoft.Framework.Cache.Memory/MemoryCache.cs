@@ -73,7 +73,7 @@ namespace Microsoft.Framework.Cache.Memory
             var now = _clock.UtcNow;
             var context = new CacheAddContext(key) { State = state, CreationTime = now };
             object value = create(context);
-            var entry = new CacheEntry(context, value, _entryExpirationNotification);
+            var entry = new CacheEntry(context, value, _entryExpirationNotification, _clock);
             bool added = false;
 
             _entryLock.EnterWriteLock();
