@@ -63,12 +63,17 @@ namespace Microsoft.Framework.Cache.Memory
 
         public object Set(string key, object state, Func<ICacheAddContext, object> create)
         {
+            return SetAndLink(key, state, create, out var link);
+        }
+
+        public object SetAndLink(string key, object state, Func<ICacheAddContext, object> create, out IExpirationTrigger link)
+        {
             CheckDisposed();
             CacheEntry priorEntry = null;
             var now = _clock.UtcNow;
             var context = new CacheAddContext(key) { State = state, CreationTime = now };
             object value = create(context);
-            var entry = new CacheEntry(context, value, _entryExpirationNotification);
+            var entry = new CacheEntry(context, value, _entryExpirationNotification, _clock);
             bool added = false;
 
             _entryLock.EnterWriteLock();
@@ -86,6 +91,7 @@ namespace Microsoft.Framework.Cache.Memory
                     entry.AttachTriggers();
                     added = true;
                 }
+                link = entry.ExpirationLink;
             }
             finally
             {
@@ -107,7 +113,13 @@ namespace Microsoft.Framework.Cache.Memory
 
         public bool TryGetValue(string key, out object value)
         {
+            return TryGetValueAndLink(key, out value, out var link);
+        }
+
+        public bool TryGetValueAndLink(string key, out object value, out IExpirationTrigger link)
+        {
             value = null;
+            link = null;
             CacheEntry expiredEntry = null;
             bool found = false;
             CheckDisposed();
@@ -128,6 +140,7 @@ namespace Microsoft.Framework.Cache.Memory
                         entry.LastAccessed = _clock.UtcNow;
                         value = entry.Value;
                         found = true;
+                        link = entry.ExpirationLink;
                     }
                 }
             }

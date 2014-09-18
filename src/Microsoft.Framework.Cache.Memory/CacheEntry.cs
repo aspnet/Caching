@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Framework.Cache.Memory.Infrastructure;
 
 namespace Microsoft.Framework.Cache.Memory
 {
@@ -15,12 +16,13 @@ namespace Microsoft.Framework.Cache.Memory
 
         private readonly Action<CacheEntry> _notifyCacheOfExpiration;
         
-        internal CacheEntry(CacheAddContext context, object value, Action<CacheEntry> notifyCacheOfExpiration)
+        internal CacheEntry(CacheAddContext context, object value, Action<CacheEntry> notifyCacheOfExpiration, ISystemClock clock)
         {
             Context = context;
             Value = value;
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
             LastAccessed = context.CreationTime;
+            ExpirationLink = new LinkedExpirationTrigger(this, clock);
         }
 
         internal CacheAddContext Context { get; private set; }
@@ -35,6 +37,8 @@ namespace Microsoft.Framework.Cache.Memory
 
         internal DateTimeOffset LastAccessed { get; set; }
 
+        internal BaseExpirationTrigger ExpirationLink { get; private set; }
+
         internal bool CheckExpired(DateTimeOffset now)
         {
             return IsExpired || CheckForExpiredTime(now) || CheckForExpiredTriggers();
@@ -48,6 +52,7 @@ namespace Microsoft.Framework.Cache.Memory
                 EvictionReason = reason;
             }
             DetachTriggers();
+            ExpirationLink.Expire();
         }
 
         private bool CheckForExpiredTime(DateTimeOffset now)
@@ -122,12 +127,18 @@ namespace Microsoft.Framework.Cache.Memory
             var registrations = TriggerRegistrations;
             if (registrations != null)
             {
-                TriggerRegistrations = null;
-                for (int i = 0; i < registrations.Count; i++)
-                {
-                    var registration = registrations[i];
-                    registration.Dispose();
-                }
+                // This needs to happen outside of the cache read/write lock because the registration removal may invoke arbitrary user code.
+                ThreadPool.QueueUserWorkItem(CacheEntry.DetachTriggers, registrations);
+            }
+        }
+
+        private static void DetachTriggers(object state)
+        {
+            var registrations = (IList<IDisposable>)state;
+            for (int i = 0; i < registrations.Count; i++)
+            {
+                var registration = registrations[i];
+                registration.Dispose();
             }
         }
 
