@@ -11,23 +11,21 @@ namespace Microsoft.Framework.Cache.Memory
     public class TimeExpirationTests
     {
         [Fact]
-        public void AbsoluteExpirationInThePastNotAdded()
+        public void AbsoluteExpirationInThePastThrows()
         {
             var clock = new TestClock();
             var cache = new MemoryCache(clock, listenForMemoryPressure: false);
             var key = "myKey";
             var obj = new object();
 
-            var result = cache.Set(key, context =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                context.SetAbsoluteExpiration(clock.UtcNow - TimeSpan.FromMinutes(1));
-                return obj;
+                var result = cache.Set(key, context =>
+                {
+                    context.SetAbsoluteExpiration(clock.UtcNow - TimeSpan.FromMinutes(1));
+                    return obj;
+                });
             });
-            Assert.Same(obj, result);
-
-            var found = cache.TryGetValue(key, out result);
-            Assert.False(found);
-            Assert.Null(result);
         }
 
         [Fact]

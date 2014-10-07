@@ -1,0 +1,12 @@
+﻿{
+  "dependencies": {
+    "Microsoft.Framework.Cache.Redis": "1.0.0-*",
+    "Xunit.KRunner": "1.0.0-*"
+  },
+  "commands": {
+    "test": "Xunit.KRunner"
+  },
+  "frameworks": {
+    "aspnet50": { }
+  }
+}
