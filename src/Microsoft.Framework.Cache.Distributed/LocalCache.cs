@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Framework.Cache.Memory;
 using Microsoft.Framework.Cache.Memory.Infrastructure;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.Framework.Cache.Distributed
 {
@@ -11,14 +12,9 @@ namespace Microsoft.Framework.Cache.Distributed
     {
         private readonly MemoryCache _memCache;
 
-        public LocalCache()
+        public LocalCache(IOptionsAccessor<MemoryCacheOptions> accessor)
         {
-            _memCache = new MemoryCache();
-        }
-
-        public LocalCache(ISystemClock clock, bool listenForMemoryPressure)
-        {
-            _memCache = new MemoryCache(clock, listenForMemoryPressure);
+            _memCache = new MemoryCache(accessor);
         }
 
         public byte[] Set(string key, object state, Func<ICacheContext, byte[]> create)

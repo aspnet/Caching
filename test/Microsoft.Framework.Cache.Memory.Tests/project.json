@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "Microsoft.AspNet.Testing": "1.0.0-*",
     "Microsoft.Framework.Cache.Memory": "1.0.0-*",
     "Xunit.KRunner": "1.0.0-*"
   },

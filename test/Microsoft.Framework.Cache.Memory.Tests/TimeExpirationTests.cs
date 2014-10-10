@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Globalization;
 using System.Threading;
+using Microsoft.AspNet.Testing;
 using Microsoft.Framework.Cache.Memory.Infrastructure;
 using Xunit;
 
@@ -10,29 +12,39 @@ namespace Microsoft.Framework.Cache.Memory
 {
     public class TimeExpirationTests
     {
+        private IMemoryCache CreateCache(ISystemClock clock)
+        {
+            return new MemoryCache(new MemoryCacheOptions()
+            {
+                Clock = clock,
+                ListenForMemoryPressure = false,
+            });
+        }
+
         [Fact]
         public void AbsoluteExpirationInThePastThrows()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var expected = clock.UtcNow - TimeSpan.FromMinutes(1);
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
-                    context.SetAbsoluteExpiration(clock.UtcNow - TimeSpan.FromMinutes(1));
+                    context.SetAbsoluteExpiration(expected);
                     return obj;
                 });
-            });
+            }, "absolute", "The absolute expiration value must be in the future.", expected.ToString(CultureInfo.CurrentCulture));
         }
 
         [Fact]
         public void AbsoluteExpirationExpires()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
@@ -58,7 +70,7 @@ namespace Microsoft.Framework.Cache.Memory
         public void AbsoluteExpirationExpiresInBackground()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
             var callbackInvoked = new ManualResetEvent(false);
@@ -94,43 +106,43 @@ namespace Microsoft.Framework.Cache.Memory
         public void NegativeRelativeExpirationThrows()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetAbsoluteExpiration(TimeSpan.FromMinutes(-1));
                     return obj;
                 });
-            });
+            }, "relative", "The relative expiration value must be positive.", TimeSpan.FromMinutes(-1));
         }
 
         [Fact]
         public void ZeroRelativeExpirationThrows()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetAbsoluteExpiration(TimeSpan.Zero);
                     return obj;
                 });
-            });
+            }, "relative", "The relative expiration value must be positive.", TimeSpan.Zero);
         }
 
         [Fact]
         public void RelativeExpirationExpires()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
@@ -156,43 +168,43 @@ namespace Microsoft.Framework.Cache.Memory
         public void NegativeSlidingExpirationThrows()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetSlidingExpiration(TimeSpan.FromMinutes(-1));
                     return obj;
                 });
-            });
+            }, "offset", "The sliding expiration value must be positive.", TimeSpan.FromMinutes(-1));
         }
 
         [Fact]
         public void ZeroSlidingExpirationThrows()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetSlidingExpiration(TimeSpan.Zero);
                     return obj;
                 });
-            });
+            }, "offset", "The sliding expiration value must be positive.", TimeSpan.Zero);
         }
 
         [Fact]
         public void SlidingExpirationExpiresIfNotAccessed()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
@@ -218,7 +230,7 @@ namespace Microsoft.Framework.Cache.Memory
         public void SlidingExpirationRenewedByAccess()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 
@@ -247,7 +259,7 @@ namespace Microsoft.Framework.Cache.Memory
         public void SlidingExpirationRenewedByAccessUntilAbsoluteExpiration()
         {
             var clock = new TestClock();
-            var cache = new MemoryCache(clock, listenForMemoryPressure: false);
+            var cache = CreateCache(clock);
             var key = "myKey";
             var obj = new object();
 

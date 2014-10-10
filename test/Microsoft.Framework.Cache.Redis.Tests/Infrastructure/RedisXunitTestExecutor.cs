@@ -3,22 +3,11 @@
 
 using System;
 using System.Reflection;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-[assembly: TestFramework("Microsoft.Framework.Cache.Redis.RedisXunitTestFramework", "Microsoft.Framework.Cache.Redis.Tests")]
-
 namespace Microsoft.Framework.Cache.Redis
 {
-    public class RedisXunitTestFramework : XunitTestFramework
-    {
-        protected override ITestFrameworkExecutor CreateExecutor(AssemblyName assemblyName)
-        {
-            return new RedisXunitTestExecutor(assemblyName, SourceInformationProvider);
-        }
-    }
-
     // TODO - should replace this whole approach with a CollectionFixture when
     // Xunit CollectionFixtures are working correctly.
     public class RedisXunitTestExecutor : XunitTestFrameworkExecutor, IDisposable

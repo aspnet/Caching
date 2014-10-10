@@ -22,7 +22,11 @@ namespace Microsoft.Framework.Cache.Redis
 
         public static RedisCache CreateCacheInstance(string instanceName)
         {
-            return new RedisCache("localhost:" + RedisPort, instanceName);
+            return new RedisCache(new RedisCacheOptions()
+            {
+                Configuration = "localhost:" + RedisPort,
+                InstanceName = instanceName,
+            });
         }
 
         public static void GetOrStartServer()

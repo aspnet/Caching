@@ -18,7 +18,11 @@ namespace RedisCacheSample
             byte[] value = new byte[10];
 
             Console.WriteLine("Connecting to cache");
-            var cache = new RedisCache("localhost", "SampleInstance");
+            var cache = new RedisCache(new RedisCacheOptions
+            {
+                Configuration = "localhost",
+                InstanceName = "SampleInstance"
+            });
             Console.WriteLine("Connected");
 
             Console.WriteLine("Setting");

@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using Microsoft.Framework.Cache.Distributed;
+using Microsoft.Framework.OptionsModel;
 using StackExchange.Redis;
 
 namespace Microsoft.Framework.Cache.Redis
@@ -32,13 +33,14 @@ namespace Microsoft.Framework.Cache.Redis
 
         private readonly string _instance;
 
-        public RedisCache([NotNull] string configuration, string instanceName)
+        public RedisCache([NotNull] IOptionsAccessor<RedisCacheOptions> accessor)
         {
+            var options = accessor.Options;
             // TODO: This may be slow and error prone, should we do it in the constructor?
-            _connection = ConnectionMultiplexer.Connect(configuration);
+            _connection = ConnectionMultiplexer.Connect(options.Configuration);
             _cache = _connection.GetDatabase();
             // This allows partitioning a single backend cache for use with multiple apps/services.
-            _instance = instanceName ?? string.Empty;
+            _instance = options.InstanceName ?? string.Empty;
         }
 
         public byte[] Set([NotNull] string key, object state, [NotNull] Func<ICacheContext, byte[]> create)
@@ -102,12 +104,12 @@ namespace Microsoft.Framework.Cache.Redis
         {
             absoluteExpiration = null;
             slidingExpiration = null;
-            long? absoluteExpirationTicks = (long?)results[0];
+            var absoluteExpirationTicks = (long?)results[0];
             if (absoluteExpirationTicks.HasValue && absoluteExpirationTicks.Value != NotPresent)
             {
                 absoluteExpiration = new DateTimeOffset(absoluteExpirationTicks.Value, TimeSpan.Zero);
             }
-            long? slidingExpirationTicks = (long?)results[1];
+            var slidingExpirationTicks = (long?)results[1];
             if (slidingExpirationTicks.HasValue && slidingExpirationTicks.Value != NotPresent)
             {
                 slidingExpiration = new TimeSpan(slidingExpirationTicks.Value);

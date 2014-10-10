@@ -2,8 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Globalization;
 using System.Threading;
-using Microsoft.Framework.Cache.Memory.Infrastructure;
+using Microsoft.AspNet.Testing;
 using Microsoft.Framework.Cache.Distributed;
 using Xunit;
 
@@ -18,14 +19,15 @@ namespace Microsoft.Framework.Cache.Redis
             var key = "myKey";
             var value = new byte[1];
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var expected = DateTimeOffset.Now - TimeSpan.FromMinutes(1);
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
-                    context.SetAbsoluteExpiration(DateTimeOffset.Now - TimeSpan.FromMinutes(1));
+                    context.SetAbsoluteExpiration(expected);
                     return value;
                 });
-            });
+            }, "absolute", "The absolute expiration value must be in the future.", expected.ToString(CultureInfo.CurrentCulture));
         }
 
         [Fact]
@@ -82,14 +84,14 @@ namespace Microsoft.Framework.Cache.Redis
             var key = "myKey";
             var value = new byte[1];
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetAbsoluteExpiration(TimeSpan.FromMinutes(-1));
                     return value;
                 });
-            });
+            }, "relative", "The relative expiration value must be positive.", TimeSpan.FromMinutes(-1));
         }
 
         [Fact]
@@ -99,14 +101,14 @@ namespace Microsoft.Framework.Cache.Redis
             var key = "myKey";
             var value = new byte[1];
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetAbsoluteExpiration(TimeSpan.Zero);
                     return value;
                 });
-            });
+            }, "relative", "The relative expiration value must be positive.", TimeSpan.Zero);
         }
 
         [Fact]
@@ -161,14 +163,14 @@ namespace Microsoft.Framework.Cache.Redis
             var key = "myKey";
             var value = new byte[1];
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetSlidingExpiration(TimeSpan.FromMinutes(-1));
                     return value;
                 });
-            });
+            }, "offset", "The sliding expiration value must be positive.", TimeSpan.FromMinutes(-1));
         }
 
         [Fact]
@@ -178,14 +180,14 @@ namespace Microsoft.Framework.Cache.Redis
             var key = "myKey";
             var value = new byte[1];
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            ExceptionAssert.ThrowsArgumentOutOfRange(() =>
             {
                 var result = cache.Set(key, context =>
                 {
                     context.SetSlidingExpiration(TimeSpan.Zero);
                     return value;
                 });
-            });
+            }, "offset", "The sliding expiration value must be positive.", TimeSpan.Zero);
         }
 
         [Fact]
