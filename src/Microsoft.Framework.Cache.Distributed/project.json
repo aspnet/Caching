@@ -1,8 +1,8 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-beta2",
   "description": "ASP.NET 5 distributed cache abstractions.",
   "dependencies": {
-    "Microsoft.Framework.Cache.Memory": "1.0.0-*"
+    "Microsoft.Framework.Cache.Memory": "1.0.0-beta2"
   },
   "frameworks": {
     "aspnet50": {},
