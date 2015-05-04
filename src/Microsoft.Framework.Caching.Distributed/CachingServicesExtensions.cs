@@ -12,7 +12,7 @@ namespace Microsoft.Framework.DependencyInjection
         {
             collection.AddOptions();
             collection.TryAdd(ServiceDescriptor.Transient<IDistributedCache, LocalCache>());
-            collection.TryAdd(ServiceDescriptor.Transient<IMemoryCache, MemoryCache>());
+            collection.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
             return collection;
         }
     }
