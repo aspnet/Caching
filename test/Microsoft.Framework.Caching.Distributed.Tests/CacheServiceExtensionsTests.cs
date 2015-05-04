@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -22,7 +22,7 @@ namespace Microsoft.Framework.Caching.Distributed
             services.AddCaching();
 
             // Assert
-            var memoryCache = services.Where(desc => desc.ServiceType == typeof(IMemoryCache)).FirstOrDefault();
+            var memoryCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IMemoryCache));
 
             Assert.NotNull(memoryCache);
             Assert.Equal(ServiceLifetime.Singleton, memoryCache.Lifetime);
@@ -38,8 +38,7 @@ namespace Microsoft.Framework.Caching.Distributed
             services.AddCaching();
 
             // Assert
-            var distributedCache = services.Where(desc => desc.ServiceType == typeof(IDistributedCache))
-                .FirstOrDefault();
+            var distributedCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IDistributedCache));
 
             Assert.NotNull(distributedCache);
             Assert.Equal(ServiceLifetime.Transient, distributedCache.Lifetime);
@@ -58,13 +57,12 @@ namespace Microsoft.Framework.Caching.Distributed
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
-            var memoryCache = services.Where(desc => desc.ServiceType == typeof(IMemoryCache)).FirstOrDefault();
+            var memoryCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IMemoryCache));
             Assert.NotNull(memoryCache);
             Assert.Equal(ServiceLifetime.Scoped, memoryCache.Lifetime);
             Assert.IsType<TestMemoryCache>(serviceProvider.GetRequiredService<IMemoryCache>());
 
-            var distributedCache = services.Where(desc => desc.ServiceType == typeof(IDistributedCache))
-                .FirstOrDefault();
+            var distributedCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IDistributedCache));
             Assert.NotNull(distributedCache);
             Assert.Equal(ServiceLifetime.Scoped, memoryCache.Lifetime);
             Assert.IsType<TestDistributedCache>(serviceProvider.GetRequiredService<IDistributedCache>());
