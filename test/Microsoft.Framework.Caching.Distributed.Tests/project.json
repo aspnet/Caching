@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "Microsoft.Framework.Caching.Distributed": "1.0.0-*",
-    "xunit.runner.aspnet": "2.0.0-aspnet-*"
+    "Microsoft.Framework.Caching.Distributed": "1.0.0-beta4",
+    "xunit.runner.aspnet": "2.0.0-aspnet-beta4"
   },
   "commands": {
     "test": "xunit.runner.aspnet"

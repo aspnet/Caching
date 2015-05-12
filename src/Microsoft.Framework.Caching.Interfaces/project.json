@@ -1,12 +1,12 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta4",
     "description": "ASP.NET 5 in memory cache abstractions.",
     "frameworks": {
         "net45": { },
         "dnx451": { },
         "dnxcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*"
+                "System.Runtime": "4.0.20-beta-22816"
             }
         }
     }
