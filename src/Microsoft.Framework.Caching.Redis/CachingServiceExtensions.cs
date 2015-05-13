@@ -11,7 +11,7 @@ namespace Microsoft.Framework.DependencyInjection
         public static IServiceCollection AddRedisCache(this IServiceCollection collection)
         {
             collection.AddOptions();
-            collection.TryAdd(ServiceDescriptor.Transient<IDistributedCache, RedisCache>());
+            collection.TryAdd(ServiceDescriptor.Singleton<IDistributedCache, RedisCache>());
             return collection;
         }
     }
