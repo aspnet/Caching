@@ -3,7 +3,6 @@
 
 using Microsoft.Framework.Caching.Distributed;
 using Microsoft.Framework.Caching.Redis;
-
 namespace Microsoft.Framework.DependencyInjection
 {
     public static class CachingServicesExtensions
