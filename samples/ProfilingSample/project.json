@@ -4,8 +4,9 @@
     },
     "commands": { "ProfilingSample": "ProfilingSample" },
     "frameworks": {
+        "net45": { },
         "dnx451": { },
-        "dnxcore50": {
+        "dotnet": {
             "dependencies": {
                 "System.Console": "4.0.0-beta-*"
             }
