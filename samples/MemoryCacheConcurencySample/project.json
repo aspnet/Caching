@@ -4,9 +4,10 @@
     },
     "commands": { "MemoryCacheConcurencySample": "MemoryCacheConcurencySample" },
     "frameworks": {
-        "dnx451": { },
-        "dnxcore50": {
-            "dependencies": {
+      "net45": { },
+      "dnx451": { },
+      "dotnet": {
+          "dependencies": {
                 "System.Console": "4.0.0-beta-*"
             }
         }
