@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Caching.Redis": "1.0.0-*"
+        "Microsoft.Framework.Caching.Redis": "1.0.0-beta5"
     },
     "commands": { "RedisCacheSample": "RedisCacheSample" },
     "frameworks" : {
