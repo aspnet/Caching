@@ -1,11 +1,11 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Caching.Abstractions": "1.0.0-*",
+        "Microsoft.Framework.Caching.Abstractions": "1.0.0-beta6",
         "Microsoft.Framework.NotNullAttribute.Sources": {
             "type": "build",
-            "version": "1.0.0-*"
+            "version": "1.0.0-beta6"
         },
-        "Microsoft.Framework.OptionsModel": "1.0.0-*"
+        "Microsoft.Framework.OptionsModel": "1.0.0-beta6"
     },
     "description": "ASP.NET 5 distributed cache implementation on Microsoft SQL Server.",
     "frameworks": {
@@ -21,9 +21,9 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Data.SqlClient": "4.0.0-beta-*"
+                "System.Data.SqlClient": "4.0.0-beta-23109"
             }
         }
     },
-    "version": "1.0.0-*"
+    "version": "1.0.0-beta6"
 }

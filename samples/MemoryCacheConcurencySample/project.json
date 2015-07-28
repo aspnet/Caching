@@ -1,13 +1,15 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Caching.Memory": "1.0.0-*"
+        "Microsoft.Framework.Caching.Memory": "1.0.0-beta6"
     },
-    "commands": { "MemoryCacheConcurencySample": "MemoryCacheConcurencySample" },
+    "commands": {
+        "MemoryCacheConcurencySample": "MemoryCacheConcurencySample"
+    },
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {},
         "dnxcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-*"
+                "System.Console": "4.0.0-beta-23109"
             }
         }
     }
