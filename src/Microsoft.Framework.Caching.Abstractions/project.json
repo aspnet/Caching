@@ -1,6 +1,10 @@
 {
     "dependencies": {
-        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" }
+      "Microsoft.Framework.NotNullAttribute.Sources": {
+        "type": "build",
+        "version": "1.0.0-beta5"
+      },
+      "Newtonsoft.Json": "6.0.6"
     },
     "description": "ASP.NET 5 in memory cache abstractions.",
     "frameworks": {
@@ -8,15 +12,12 @@
         "dnx451": { },
         "dotnet": {
             "dependencies": {
-                "System.Collections": "4.0.10-beta-*",
-                "System.Threading": "4.0.10-beta-*",
-                "System.Threading.Tasks": "4.0.10-beta-*"
+                "System.Collections": "4.0.10-beta-23019",
+                "System.Threading": "4.0.10-beta-23019",
+                "System.Threading.ThreadPool": "4.0.10-beta-23019",
+                "System.Threading.Tasks": "4.0.10-beta-23019"
             }
         }
     },
-    "version": "1.0.0-*",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/aspnet/caching"
-    }
+    "version": "1.0.0-beta5"
 }
