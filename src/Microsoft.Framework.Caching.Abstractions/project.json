@@ -2,7 +2,7 @@
     "dependencies": {
       "Microsoft.Framework.NotNullAttribute.Sources": {
         "type": "build",
-        "version": "1.0.0-beta5"
+        "version": "1.0.0-*"
       },
       "Newtonsoft.Json": "6.0.6"
     },
@@ -12,12 +12,15 @@
         "dnx451": { },
         "dotnet": {
             "dependencies": {
-                "System.Collections": "4.0.10-beta-23019",
-                "System.Threading": "4.0.10-beta-23019",
-                "System.Threading.ThreadPool": "4.0.10-beta-23019",
-                "System.Threading.Tasks": "4.0.10-beta-23019"
+                "System.Collections": "4.0.10-beta-*",
+                "System.Threading": "4.0.10-beta-*",
+                "System.Threading.Tasks": "4.0.10-beta-*"
             }
         }
     },
-    "version": "1.0.0-beta5"
+    "version": "1.0.0-*",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aspnet/caching"
+    }
 }
