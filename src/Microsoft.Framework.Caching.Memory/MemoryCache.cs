@@ -94,7 +94,10 @@ namespace Microsoft.Framework.Caching.Memory
                 utcNow,
                 absoluteExpiration,
                 cacheEntryOptions,
-                _entryExpirationNotification);
+                _entryExpirationNotification)
+            {
+                RunCleanupInBackgroundThread = this.RunCleanupInBackgroundThread
+            };
 
             var link = EntryLinkHelpers.ContextLink;
             if (link != null)
@@ -229,6 +232,9 @@ namespace Microsoft.Framework.Caching.Memory
             StartScanForExpiredItems();
         }
 
+        // To enable unit testing
+        internal bool RunCleanupInBackgroundThread { get; set; } = true;
+
         private void RemoveEntry(CacheEntry entry)
         {
             _entryLock.EnterWriteLock();
@@ -291,8 +297,15 @@ namespace Microsoft.Framework.Caching.Memory
             if (_expirationScanFrequency < now - _lastExpirationScan)
             {
                 _lastExpirationScan = now;
-                Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
-                    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+
+                if (RunCleanupInBackgroundThread)
+                {
+                    Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
+                        CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                }
+                {
+                    ScanForExpiredItems(this);
+                }
             }
         }
 

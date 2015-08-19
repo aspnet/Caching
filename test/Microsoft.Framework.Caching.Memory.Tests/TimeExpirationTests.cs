@@ -18,7 +18,10 @@ namespace Microsoft.Framework.Caching.Memory
             {
                 Clock = clock,
                 CompactOnMemoryPressure = false,
-            });
+            })
+            {
+                RunCleanupInBackgroundThread = false
+            };
         }
 
         [Fact]
@@ -70,16 +73,16 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache(clock);
             var key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackStatus = new CallbackStatus();
 
             var options = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(clock.UtcNow + TimeSpan.FromMinutes(1))
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
                 {
                     // TODO: Verify params
-                    var localCallbackInvoked = (ManualResetEvent)state;
-                    localCallbackInvoked.Set();
-                }, callbackInvoked);
+                    var localcallbackStatus = (CallbackStatus)state;
+                    localcallbackStatus.Invoked = true;
+                }, callbackStatus);
             var result = cache.Set(key, value, options);
             Assert.Same(value, result);
 
@@ -90,7 +93,7 @@ namespace Microsoft.Framework.Caching.Memory
             clock.Add(TimeSpan.FromMinutes(2));
             var ignored = cache.Get("otherKey"); // Background expiration checks are triggered by misc cache activity.
 
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackStatus.Invoked);
 
             found = cache.TryGetValue(key, out result);
             Assert.False(found);
@@ -269,6 +272,11 @@ namespace Microsoft.Framework.Caching.Memory
             found = cache.TryGetValue(key, out result);
             Assert.False(found);
             Assert.Null(result);
+        }
+
+        class CallbackStatus
+        {
+            public bool Invoked { get; set; }
         }
     }
 }

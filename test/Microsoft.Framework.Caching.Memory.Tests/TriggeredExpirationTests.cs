@@ -22,7 +22,10 @@ namespace Microsoft.Framework.Caching.Memory
             {
                 Clock = clock,
                 CompactOnMemoryPressure = false,
-            });
+            })
+            {
+                RunCleanupInBackgroundThread = false
+            };
         }
 
         [Fact]
@@ -62,15 +65,15 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache();
             string key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackInvoked = new CallbackStatus();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = true };
             cache.Set(key, value, new MemoryCacheEntryOptions()
                 .AddExpirationTrigger(trigger)
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
                 {
                     // TODO: Verify params
-                    var localCallbackInvoked = (ManualResetEvent)state;
-                    localCallbackInvoked.Set();
+                    var callbackStatus = (CallbackStatus)state;
+                    callbackStatus.Invoked = true;
                 }, state: callbackInvoked));
 
             trigger.Fire();
@@ -78,7 +81,7 @@ namespace Microsoft.Framework.Caching.Memory
             var found = cache.TryGetValue(key, out value);
             Assert.False(found);
 
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackInvoked.Invoked);
         }
 
         [Fact]
@@ -87,15 +90,15 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache();
             string key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackInvoked = new CallbackStatus();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = false };
             cache.Set(key, value, new MemoryCacheEntryOptions()
                 .AddExpirationTrigger(trigger)
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
                 {
                     // TODO: Verify params
-                    var localCallbackInvoked = (ManualResetEvent)state;
-                    localCallbackInvoked.Set();
+                    var callbackStatus = (CallbackStatus)state;
+                    callbackStatus.Invoked = true;
                 }, state: callbackInvoked));
 
             var found = cache.TryGetValue(key, out value);
@@ -106,7 +109,7 @@ namespace Microsoft.Framework.Caching.Memory
             found = cache.TryGetValue(key, out value);
             Assert.False(found);
 
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackInvoked.Invoked);
         }
 
         [Fact]
@@ -116,15 +119,15 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache(clock);
             string key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackInvoked = new CallbackStatus();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = false };
             cache.Set(key, value, new MemoryCacheEntryOptions()
                 .AddExpirationTrigger(trigger)
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
             {
                 // TODO: Verify params
-                var localCallbackInvoked = (ManualResetEvent)state;
-                localCallbackInvoked.Set();
+                var callbackStatus = (CallbackStatus)state;
+                callbackStatus.Invoked = true;
             }, state: callbackInvoked));
             var found = cache.TryGetValue(key, out value);
             Assert.True(found);
@@ -132,7 +135,7 @@ namespace Microsoft.Framework.Caching.Memory
             clock.Add(TimeSpan.FromMinutes(2));
             trigger.IsExpired = true;
             var ignored = cache.Get("otherKey"); // Background expiration checks are triggered by misc cache activity.
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackInvoked.Invoked);
 
             found = cache.TryGetValue(key, out value);
             Assert.False(found);
@@ -144,21 +147,21 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache();
             string key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackInvoked = new CallbackStatus();
             var trigger = new TestTrigger() { ActiveExpirationCallbacks = true };
             cache.Set(key, value, new MemoryCacheEntryOptions()
                 .AddExpirationTrigger(trigger)
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
             {
                 // TODO: Verify params
-                var localCallbackInvoked = (ManualResetEvent)state;
-                localCallbackInvoked.Set();
+                var callbackStatus = (CallbackStatus)state;
+                callbackStatus.Invoked = true;
             }, state: callbackInvoked));
             cache.Remove(key);
 
             Assert.NotNull(trigger.Registration);
             Assert.True(trigger.Registration.Disposed);
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackInvoked.Invoked);
         }
 
         [Fact]
@@ -167,25 +170,30 @@ namespace Microsoft.Framework.Caching.Memory
             var cache = CreateCache();
             string key = "myKey";
             var value = new object();
-            var callbackInvoked = new ManualResetEvent(false);
+            var callbackInvoked = new CallbackStatus();
             var trigger = new TestTrigger() { IsExpired = true };
             var result = cache.Set(key, value, new MemoryCacheEntryOptions()
                 .AddExpirationTrigger(trigger)
                 .RegisterPostEvictionCallback((subkey, subValue, reason, state) =>
             {
                 // TODO: Verify params
-                var localCallbackInvoked = (ManualResetEvent)state;
-                localCallbackInvoked.Set();
+                var callbackStatus = (CallbackStatus)state;
+                callbackStatus.Invoked = true;
             }, state: callbackInvoked));
             Assert.Same(value, result); // The created item should be returned, but not cached.
 
             Assert.True(trigger.IsExpiredWasCalled);
             Assert.False(trigger.ActiveExpirationCallbacksWasCalled);
             Assert.Null(trigger.Registration);
-            Assert.True(callbackInvoked.WaitOne(1000), "Callback");
+            Assert.True(callbackInvoked.Invoked);
 
             result = cache.Get(key);
             Assert.Null(result); // It wasn't cached
+        }
+
+        class CallbackStatus
+        {
+            public bool Invoked { get; set; }
         }
     }
 }

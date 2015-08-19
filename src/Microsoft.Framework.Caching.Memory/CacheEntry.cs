@@ -39,6 +39,9 @@ namespace Microsoft.Framework.Caching.Memory
 
         internal object Value { get; private set; }
 
+        // To enable unit testing
+        internal bool RunCleanupInBackgroundThread { get; set; } = true;
+
         private bool IsExpired { get; set; }
 
         internal EvictionReason EvictionReason { get; private set; }
@@ -150,8 +153,15 @@ namespace Microsoft.Framework.Caching.Memory
         {
             if (PostEvictionCallbacks != null)
             {
-                Task.Factory.StartNew(state => InvokeCallbacks((CacheEntry)state), this,
-                    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                if (RunCleanupInBackgroundThread)
+                {
+                    Task.Factory.StartNew(state => InvokeCallbacks((CacheEntry)state), this,
+                        CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                }
+                else
+                {
+                    InvokeCallbacks(this);
+                }
             }
         }
 
