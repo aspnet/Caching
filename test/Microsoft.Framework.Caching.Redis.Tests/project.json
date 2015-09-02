@@ -1,8 +1,8 @@
 {
     "dependencies": {
-        "Microsoft.AspNet.Testing": "1.0.0-*",
-        "Microsoft.Framework.Caching.Redis": "1.0.0-*",
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
+        "Microsoft.AspNet.Testing": "1.0.0-beta7",
+        "Microsoft.Framework.Caching.Redis": "1.0.0-beta7",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta7",
         "xunit": "2.1.0-*",
         "xunit.runner.dnx": "2.1.0-*"
     },
@@ -10,6 +10,6 @@
         "test": "xunit.runner.dnx"
     },
     "frameworks": {
-        "dnx451": { }
+        "dnx451": {}
     }
 }
