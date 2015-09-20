@@ -1,0 +1,9 @@
+{
+    "dependencies": {
+        "Microsoft.Framework.Caching.MongoDB": "1.0.0-*"
+    },
+    "commands": { "MongoDBCacheSample": "MongoDBCacheSample" },
+    "frameworks" : {
+        "dnx451" : { }
+    }
+}
