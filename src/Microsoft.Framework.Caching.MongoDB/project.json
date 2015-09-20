@@ -1,0 +1,20 @@
+{
+    "version": "1.0.0-*",
+    "description": "ASP.NET 5 distributed cache implementation on MongoDB.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aspnet/caching"
+    },
+    "compilationOptions": {
+        "warningsAsErrors": true
+    },
+    "dependencies": {
+        "Microsoft.Framework.Caching.Abstractions": "1.0.0-*",
+      "Microsoft.Framework.OptionsModel": "1.0.0-*",
+      "MongoDB.Driver":  "2.0.1"
+    },
+    "frameworks": {
+        "dnx451": { },
+        "net45": { }
+    }
+}
