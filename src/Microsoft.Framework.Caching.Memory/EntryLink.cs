@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Framework.Primitives;
 
 namespace Microsoft.Framework.Caching.Memory
 {
     public class EntryLink : IEntryLink
     {
+        private readonly List<IChangeToken> _tokens = new List<IChangeToken>();
         private bool _disposed;
 
         public EntryLink()
@@ -22,15 +24,18 @@ namespace Microsoft.Framework.Caching.Memory
 
         public EntryLink Parent { get; }
 
-        private readonly List<IExpirationTrigger> _triggers = new List<IExpirationTrigger>();
-
         public DateTimeOffset? AbsoluteExpiration { get; private set; }
 
-        public IEnumerable<IExpirationTrigger> Triggers { get { return _triggers; } }
+        public IEnumerable<IChangeToken> ChangeTokens => _tokens;
 
-        public void AddExpirationTriggers(IList<IExpirationTrigger> triggers)
+        public void AddChangeTokens(IList<IChangeToken> tokens)
         {
-            _triggers.AddRange(triggers);
+            if (tokens == null)
+            {
+                throw new ArgumentNullException(nameof(tokens));
+            }
+
+            _tokens.AddRange(tokens);
         }
 
         public void SetAbsoluteExpiration(DateTimeOffset absoluteExpiration)

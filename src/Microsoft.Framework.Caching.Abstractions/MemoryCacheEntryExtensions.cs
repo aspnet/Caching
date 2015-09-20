@@ -2,13 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Framework.Primitives;
 
 namespace Microsoft.Framework.Caching.Memory
 {
     public static class MemoryCacheEntryExtensions
     {
         /// <summary>
-        /// Sets the priority for keeping the cache entry in the cache during a memory pressure triggered cleanup.
+        /// Sets the priority for keeping the cache entry in the cache during a memory pressure tokened cleanup.
         /// </summary>
         /// <param name="options"></param>
         /// <param name="priority"></param>
@@ -24,17 +25,17 @@ namespace Microsoft.Framework.Caching.Memory
         /// Expire the cache entry if the given event occurs.
         /// </summary>
         /// <param name="options"></param>
-        /// <param name="trigger"></param>
-        public static MemoryCacheEntryOptions AddExpirationTrigger(
+        /// <param name="token"></param>
+        public static MemoryCacheEntryOptions AddExpirationToken(
             this MemoryCacheEntryOptions options,
-            IExpirationTrigger trigger)
+            IChangeToken token)
         {
-            if (trigger == null)
+            if (token == null)
             {
-                throw new ArgumentNullException(nameof(trigger));
+                throw new ArgumentNullException(nameof(token));
             }
 
-            options.Triggers.Add(trigger);
+            options.ChangeTokens.Add(token);
             return options;
         }
 
@@ -121,14 +122,14 @@ namespace Microsoft.Framework.Caching.Memory
         }
 
         /// <summary>
-        /// Adds inherited trigger and absolute expiration information.
+        /// Adds inherited token and absolute expiration information.
         /// </summary>
         /// <param name="link"></param>
         public static MemoryCacheEntryOptions AddEntryLink(this MemoryCacheEntryOptions options, IEntryLink link)
         {
-            foreach (var trigger in link.Triggers)
+            foreach (var token in link.ChangeTokens)
             {
-                options.AddExpirationTrigger(trigger);
+                options.AddExpirationToken(token);
             }
 
             if (link.AbsoluteExpiration.HasValue)

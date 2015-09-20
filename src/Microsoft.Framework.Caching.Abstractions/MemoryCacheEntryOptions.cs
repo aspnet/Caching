@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Framework.Primitives;
 
 namespace Microsoft.Framework.Caching.Memory
 {
@@ -74,9 +75,9 @@ namespace Microsoft.Framework.Caching.Memory
         }
 
         /// <summary>
-        /// Gets or sets the events which are fired when the cache entry expires.
+        /// Gets or sets the <see cref="IChangeToken"/>s which are notified when the cache entry expires.
         /// </summary>
-        public IList<IExpirationTrigger> Triggers { get; } = new List<IExpirationTrigger>();
+        public IList<IChangeToken> ChangeTokens { get; } = new List<IChangeToken>();
 
         /// <summary>
         /// Gets or sets the callbacks will be fired after the cache entry is evicted from the cache.
