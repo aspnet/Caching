@@ -2,49 +2,50 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Framework.Primitives;
 
 namespace Microsoft.Framework.Caching.Memory.Infrastructure
 {
-    internal class TestTrigger : IExpirationTrigger
+    internal class TestChangeToken : IChangeToken
     {
-        private bool _isExpired;
-        private bool _activeExpirationCallbacks;
+        private bool _hasChanged;
+        private bool _activeChangeCallbacks;
 
-        public bool IsExpired
+        public bool HasChanged
         {
             get
             {
                 IsExpiredWasCalled = true;
-                return _isExpired;
+                return _hasChanged;
             }
             set
             {
-                _isExpired = value;
+                _hasChanged = value;
             }
         }
 
         public bool IsExpiredWasCalled { get; set; }
 
-        public bool ActiveExpirationCallbacks
+        public bool ActiveChangeCallbacks
         {
             get
             {
-                ActiveExpirationCallbacksWasCalled = true;
-                return _activeExpirationCallbacks;
+                ActiveChangeCallbacksWasCalled = true;
+                return _activeChangeCallbacks;
             }
             set
             {
-                _activeExpirationCallbacks = value;
+                _activeChangeCallbacks = value;
             }
         }
 
-        public bool ActiveExpirationCallbacksWasCalled { get; set; }
+        public bool ActiveChangeCallbacksWasCalled { get; set; }
 
-        public TriggerCallbackRegistration Registration { get; set; }
+        public TokenCallbackRegistration Registration { get; set; }
 
-        public IDisposable RegisterExpirationCallback(Action<object> callback, object state)
+        public IDisposable RegisterChangeCallback(Action<object> callback, object state)
         {
-            Registration = new TriggerCallbackRegistration()
+            Registration = new TokenCallbackRegistration()
             {
                 RegisteredCallback = callback,
                 RegisteredState = state,
@@ -54,7 +55,7 @@ namespace Microsoft.Framework.Caching.Memory.Infrastructure
 
         public void Fire()
         {
-            IsExpired = true;
+            HasChanged = true;
             if (Registration != null && !Registration.Disposed)
             {
                 Registration.RegisteredCallback(Registration.RegisteredState);
