@@ -3,17 +3,17 @@
         "SqlServerCacheConcurrencySample": "SqlServerCacheConcurrencySample"
     },
     "dependencies": {
-        "Microsoft.Framework.Caching.SqlServer": "1.0.0-*",
-        "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-*",
-        "Microsoft.Framework.Configuration.Json": "1.0.0-*",
-        "Microsoft.Framework.OptionsModel": "1.0.0-*",
+        "Microsoft.Framework.Caching.SqlServer": "1.0.0-beta8",
+        "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-beta8",
+        "Microsoft.Framework.Configuration.Json": "1.0.0-beta8",
+        "Microsoft.Framework.OptionsModel": "1.0.0-beta8",
         "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*"
     },
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {},
         "dnxcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-*"
+                "System.Console": "4.0.0-beta-23409"
             }
         }
     }

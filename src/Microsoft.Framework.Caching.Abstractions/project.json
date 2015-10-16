@@ -4,29 +4,29 @@
     },
     "description": "ASP.NET 5 caching abstractions.",
     "dependencies": {
-        "Microsoft.Framework.Primitives": "1.0.0-*"
+        "Microsoft.Framework.Primitives": "1.0.0-beta8"
     },
     "frameworks": {
-        "net45": { },
-        "dnx451": { },
+        "net45": {},
+        "dnx451": {},
         "dnxcore50": {
             "dependencies": {
-                "System.Collections": "4.0.11-beta-*",
-                "System.Threading": "4.0.11-beta-*",
-                "System.Threading.Tasks": "4.0.11-beta-*"
+                "System.Collections": "4.0.11-beta-23409",
+                "System.Threading": "4.0.11-beta-23409",
+                "System.Threading.Tasks": "4.0.11-beta-23409"
             }
         },
         "dotnet": {
-            "dependencies": {                
-                "System.Collections": "4.0.10",
-                "System.Diagnostics.Debug": "4.0.10",
-                "System.Resources.ResourceManager": "4.0.0",
-                "System.Runtime": "4.0.20",
-                "System.Threading.Tasks": "4.0.10"
+            "dependencies": {
+                "System.Collections": "4.0.11-beta-23409",
+                "System.Diagnostics.Debug": "4.0.11-beta-23409",
+                "System.Resources.ResourceManager": "4.0.1-beta-23409",
+                "System.Runtime": "4.0.21-beta-23409",
+                "System.Threading.Tasks": "4.0.11-beta-23409"
             }
         }
     },
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta8",
     "repository": {
         "type": "git",
         "url": "https://github.com/aspnet/caching"
