@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "Microsoft.Extensions.Caching.Abstractions": "1.0.0-*",
-    "Microsoft.Extensions.OptionsModel": "1.0.0-*"
+    "Microsoft.Extensions.Caching.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final"
   },
   "description": "ASP.NET 5 distributed cache implementation on Microsoft SQL Server.",
   "compilationOptions": {
@@ -16,11 +16,11 @@
     },
     "dotnet5.4": {
       "dependencies": {
-        "System.Data.SqlClient": "4.0.0-beta-*"
+        "System.Data.SqlClient": "4.0.0-beta-23516"
       }
     }
   },
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "repository": {
     "type": "git",
     "url": "https://github.com/aspnet/caching"

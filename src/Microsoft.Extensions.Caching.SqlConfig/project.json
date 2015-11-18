@@ -4,11 +4,11 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "version": "1.0.0-*",
+      "version": "1.0.0-rc1-final",
       "type": "build"
     },
-    "Microsoft.Extensions.Logging": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-*"
+    "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final"
   },
   "description": "Contains commands for creating table and indexes in Microsoft SQL Server database to be used for ASP.NET 5 distributed caching.",
   "frameworks": {
@@ -19,8 +19,8 @@
     },
     "dotnet5.4": {
       "dependencies": {
-        "System.Console": "4.0.0-beta-*",
-        "System.Data.SqlClient": "4.0.0-beta-*"
+        "System.Console": "4.0.0-beta-23516",
+        "System.Data.SqlClient": "4.0.0-beta-23516"
       }
     }
   },
@@ -28,7 +28,7 @@
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "repository": {
     "type": "git",
     "url": "https://github.com/aspnet/caching"
