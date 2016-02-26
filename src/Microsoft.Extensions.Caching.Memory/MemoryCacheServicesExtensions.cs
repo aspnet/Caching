@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>A reference to this instance after the operation has completed.</returns> 
         public static IServiceCollection AddCaching(this IServiceCollection services)
         {
-            services.AddOptions();
+            services.TryAddSingleton<MemoryCacheOptions>();
             services.TryAdd(ServiceDescriptor.Transient<IDistributedCache, LocalCache>());
             services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
             return services;

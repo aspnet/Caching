@@ -34,7 +34,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(options));
             }
 
-            services.AddOptions();
             AddSqlServerCacheServices(services);
             services.Configure(options);
             return services;
@@ -43,6 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
         // to enable unit testing
         internal static void AddSqlServerCacheServices(IServiceCollection services)
         {
+            services.TryAddSingleton<SqlServerCacheOptions>();
             services.TryAdd(ServiceDescriptor.Singleton<IDistributedCache, SqlServerCache>());
         }
     }
