@@ -20,11 +20,16 @@ namespace Microsoft.Extensions.Caching.SqlServer
             SqlServerCachingServicesExtensions.AddSqlServerCacheServices(services);
 
             // Assert
-            Assert.Equal(1, services.Count);
+            Assert.Equal(2, services.Count);
             var serviceDescriptor = services[0];
+            Assert.Equal(typeof(SqlServerCacheOptions), serviceDescriptor.ServiceType);
+            Assert.Equal(typeof(SqlServerCacheOptions), serviceDescriptor.ImplementationType);
+            Assert.Equal(ServiceLifetime.Singleton, serviceDescriptor.Lifetime);
+            serviceDescriptor = services[1];
             Assert.Equal(typeof(IDistributedCache), serviceDescriptor.ServiceType);
             Assert.Equal(typeof(SqlServerCache), serviceDescriptor.ImplementationType);
             Assert.Equal(ServiceLifetime.Singleton, serviceDescriptor.Lifetime);
+
         }
     }
 }

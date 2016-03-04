@@ -2,13 +2,25 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Caching.SqlServer
 {
-    public class SqlServerCacheOptions : IOptions<SqlServerCacheOptions>
+    public class SqlServerCacheOptions
     {
+        public SqlServerCacheOptions(IEnumerable<IConfigureOptions<SqlServerCacheOptions>> configureOptions = null)
+        {
+            if (configureOptions != null)
+            {
+                foreach (var configure in configureOptions)
+                {
+                    configure.Configure(this);
+                }
+            }
+        }
+
         /// <summary>
         /// An abstraction to represent the clock of a machine in order to enable unit testing.
         /// </summary>
@@ -33,13 +45,5 @@ namespace Microsoft.Extensions.Caching.SqlServer
         /// Name of the table where the cache items are stored.
         /// </summary>
         public string TableName { get; set; }
-
-        SqlServerCacheOptions IOptions<SqlServerCacheOptions>.Value
-        {
-            get
-            {
-                return this;
-            }
-        }
     }
 }

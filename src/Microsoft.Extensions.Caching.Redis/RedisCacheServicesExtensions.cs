@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddOptions();
+            services.TryAddSingleton<RedisCacheOptions>();
             services.TryAdd(ServiceDescriptor.Singleton<IDistributedCache, RedisCache>());
             return services;
         }

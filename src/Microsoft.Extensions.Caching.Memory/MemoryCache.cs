@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
@@ -26,15 +25,14 @@ namespace Microsoft.Extensions.Caching.Memory
         /// <summary>
         /// Creates a new MemoryCache instance.
         /// </summary>
-        /// <param name="optionsAccessor"></param>
-        public MemoryCache(IOptions<MemoryCacheOptions> optionsAccessor)
+        /// <param name="options"></param>
+        public MemoryCache(MemoryCacheOptions options)
         {
-            if (optionsAccessor == null)
+            if (options == null)
             {
-                throw new ArgumentNullException(nameof(optionsAccessor));
+                throw new ArgumentNullException(nameof(options));
             }
 
-            var options = optionsAccessor.Value;
             _entries = new Dictionary<object, CacheEntry>();
             _entryLock = new ReaderWriterLockSlim();
             _entryExpirationNotification = EntryExpired;

@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Microsoft.Extensions.Caching.Redis
@@ -34,14 +33,14 @@ namespace Microsoft.Extensions.Caching.Redis
         private readonly RedisCacheOptions _options;
         private readonly string _instance;
 
-        public RedisCache(IOptions<RedisCacheOptions> optionsAccessor)
+        public RedisCache(RedisCacheOptions options)
         {
-            if (optionsAccessor == null)
+            if (options == null)
             {
-                throw new ArgumentNullException(nameof(optionsAccessor));
+                throw new ArgumentNullException(nameof(options));
             }
 
-            _options = optionsAccessor.Value;
+            _options = options;
 
             // This allows partitioning a single backend cache for use with multiple apps/services.
             _instance = _options.InstanceName ?? string.Empty;

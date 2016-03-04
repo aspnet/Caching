@@ -626,7 +626,7 @@ namespace Microsoft.Extensions.Caching.SqlServer
             }
         }
 
-        private class TestSqlServerCacheOptions : IOptions<SqlServerCacheOptions>
+        private class TestSqlServerCacheOptions : SqlServerCacheOptions
         {
             private readonly SqlServerCacheOptions _innerOptions;
 

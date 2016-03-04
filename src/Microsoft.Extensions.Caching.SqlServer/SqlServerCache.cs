@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Caching.SqlServer
 {
@@ -23,9 +22,9 @@ namespace Microsoft.Extensions.Caching.SqlServer
         private DateTimeOffset _lastExpirationScan;
         private readonly Action _deleteExpiredCachedItemsDelegate;
 
-        public SqlServerCache(IOptions<SqlServerCacheOptions> options)
+        public SqlServerCache(SqlServerCacheOptions options)
         {
-            var cacheOptions = options.Value;
+            var cacheOptions = options;
 
             if (string.IsNullOrEmpty(cacheOptions.ConnectionString))
             {
