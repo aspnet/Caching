@@ -14,10 +14,21 @@
   },
   "dependencies": {
     "Microsoft.Extensions.Caching.Abstractions": "1.0.0-*",
-    "Microsoft.Extensions.Options": "1.0.0-*",
-    "StackExchange.Redis.StrongName": "1.0.333"
+    "Microsoft.Extensions.Options": "1.0.0-*"
   },
   "frameworks": {
-    "net451": {}
+    "net451": {
+      "StackExchange.Redis.StrongName": "1.0.488"
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "StackExchange.Redis.StrongName": "1.1.553-alpha"
+      }
+    },
+    "dotnet5.5": {
+      "dependencies": {
+        "StackExchange.Redis.StrongName": "1.1.553-alpha"
+      }
+    }
   }
 }
