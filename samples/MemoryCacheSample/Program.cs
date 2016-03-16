@@ -101,7 +101,6 @@ namespace MemoryCacheSample
 
                 // expire this entry if the entry with key "key1" expires.
                 cache.Set("key2", "value2", new MemoryCacheEntryOptions()
-                    .AddEntryLink(link)
                     .RegisterPostEvictionCallback(
                     (echoKey, value, reason, substate) =>
                     {

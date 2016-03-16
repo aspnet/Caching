@@ -97,27 +97,32 @@ namespace Microsoft.Extensions.Caching.Memory
                 absoluteExpiration = cacheEntryOptions.AbsoluteExpiration;
             }
 
+            var link = EntryLinkHelpers.ContextLink;
+
             var entry = new CacheEntry(
                 key,
                 value,
                 utcNow,
                 absoluteExpiration,
                 cacheEntryOptions,
-                _entryExpirationNotification);
+                _entryExpirationNotification,
+                link);
 
-            var link = EntryLinkHelpers.ContextLink;
-            if (link != null)
+            // Copy expiration tokens and AbsoluteExpiration to the links hierarchy.
+            // We do this regardless of it gets cached because the tokens are associated with the value we'll return.
+            while (link != null)
             {
-                // Copy expiration tokens and AbsoluteExpiration to the link.
-                // We do this regardless of it gets cached because the tokens are associated with the value we'll return.
-                if (entry.Options.ExpirationTokens != null)
+                if (cacheEntryOptions.ExpirationTokens != null)
                 {
-                    link.AddExpirationTokens(entry.Options.ExpirationTokens);
+                    link.AddExpirationTokens(cacheEntryOptions.ExpirationTokens);
                 }
+
                 if (absoluteExpiration.HasValue)
                 {
                     link.SetAbsoluteExpiration(absoluteExpiration.Value);
                 }
+
+                link = link.Parent;
             }
 
             bool added = false;
