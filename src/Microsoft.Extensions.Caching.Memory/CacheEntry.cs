@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.Caching.Memory
 
         private readonly DateTimeOffset? _absoluteExpiration;
 
+        private readonly EntryLink _entryLink;
+
         private IList<PostEvictionCallbackRegistration> _postEvictionCallbacks;
 
         internal readonly object _lock = new object();
@@ -26,7 +28,8 @@ namespace Microsoft.Extensions.Caching.Memory
             DateTimeOffset utcNow,
             DateTimeOffset? absoluteExpiration,
             MemoryCacheEntryOptions options,
-            Action<CacheEntry> notifyCacheOfExpiration)
+            Action<CacheEntry> notifyCacheOfExpiration,
+            EntryLink entryLink)
         {
             Key = key;
             Value = value;
@@ -35,6 +38,7 @@ namespace Microsoft.Extensions.Caching.Memory
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
             _absoluteExpiration = absoluteExpiration;
             _postEvictionCallbacks = options.PostEvictionCallbacks;
+            _entryLink = entryLink;
         }
 
         internal MemoryCacheEntryOptions Options { get; private set; }
@@ -81,6 +85,13 @@ namespace Microsoft.Extensions.Caching.Memory
                 return true;
             }
 
+            // Check for the link's absolute expiration
+            if (_entryLink != null && _entryLink.AbsoluteExpiration.HasValue && _entryLink.AbsoluteExpiration.Value <= now)
+            {
+                SetExpired(EvictionReason.Expired);
+                return true;
+            }
+
             return false;
         }
 
@@ -99,6 +110,24 @@ namespace Microsoft.Extensions.Caching.Memory
                     }
                 }
             }
+
+            var link = _entryLink;
+            if (link != null)
+            {
+                var linkTokens = link.ExpirationTokens;
+                if (linkTokens != null)
+                {
+                    foreach (var expiredToken in linkTokens)
+                    {
+                        if (expiredToken.HasChanged)
+                        {
+                            SetExpired(EvictionReason.TokenExpired);
+                            return true;
+                        }
+                    }
+                }
+            }
+
             return false;
         }
 

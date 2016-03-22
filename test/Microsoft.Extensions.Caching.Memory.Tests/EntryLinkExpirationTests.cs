@@ -80,7 +80,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 cache.Set(key, obj, new MemoryCacheEntryOptions().AddExpirationToken(expirationToken));
 
-                cache.Set(key1, obj, new MemoryCacheEntryOptions().AddEntryLink(link));
+                cache.Set(key1, obj, new MemoryCacheEntryOptions());
             }
 
             Assert.Same(obj, cache.Get(key));
@@ -91,6 +91,72 @@ namespace Microsoft.Extensions.Caching.Memory
             object value;
             Assert.False(cache.TryGetValue(key1, out value));
             Assert.False(cache.TryGetValue(key, out value));
+        }
+
+        [Fact]
+        public void TokenExpires_ParentScopeEntry()
+        {
+            var cache = CreateCache();
+            var obj = new object();
+            string key = "myKey";
+            string key1 = "myKey1";
+            var expirationToken = new TestExpirationToken() { ActiveChangeCallbacks = true };
+
+            using (var link1 = cache.CreateLinkingScope())
+            {
+                cache.Set(key, obj, new MemoryCacheEntryOptions());
+
+                using (var link2 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key1, obj, new MemoryCacheEntryOptions().AddExpirationToken(expirationToken));
+                }
+            }
+
+            Assert.Same(obj, cache.Get(key));
+            Assert.Same(obj, cache.Get(key1));
+
+            expirationToken.Fire();
+
+            object value;
+            Assert.False(cache.TryGetValue(key1, out value));
+            Assert.False(cache.TryGetValue(key, out value));
+        }
+
+        [Fact]
+        public void TokenDoesntExpire_SiblingScopeEntry()
+        {
+            var cache = CreateCache();
+            var obj = new object();
+            string key = "myKey";
+            string key1 = "myKey1";
+            string key2 = "myKey2";
+            var expirationToken = new TestExpirationToken() { ActiveChangeCallbacks = true };
+
+            using (var link1 = cache.CreateLinkingScope())
+            {
+                cache.Set(key, obj, new MemoryCacheEntryOptions());
+
+                using (var link2 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key1, obj, new MemoryCacheEntryOptions().AddExpirationToken(expirationToken));
+                }
+
+                using (var link3 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key2, obj, new MemoryCacheEntryOptions());
+                }
+            }
+
+            Assert.Same(obj, cache.Get(key));
+            Assert.Same(obj, cache.Get(key1));
+            Assert.Same(obj, cache.Get(key2));
+
+            expirationToken.Fire();
+
+            object value;
+            Assert.False(cache.TryGetValue(key1, out value));
+            Assert.False(cache.TryGetValue(key, out value));
+            Assert.True(cache.TryGetValue(key2, out value));
         }
 
         [Fact]
@@ -107,7 +173,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 cache.Set(key, obj, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(5)));
 
-                cache.Set(key1, obj, new MemoryCacheEntryOptions().AddEntryLink(link));
+                cache.Set(key1, obj, new MemoryCacheEntryOptions());
             }
 
             Assert.Same(obj, cache.Get(key));
@@ -121,12 +187,79 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         [Fact]
+        public void AbsoluteExpiration_WorksAcrossNestedLink()
+        {
+            var clock = new TestClock();
+            var cache = CreateCache(clock);
+            var obj = new object();
+            string key1 = "myKey1";
+            string key2 = "myKey2";
+            var expirationToken = new TestExpirationToken() { ActiveChangeCallbacks = true };
+
+            using (var link1 = cache.CreateLinkingScope())
+            {
+                cache.Set(key1, obj, new MemoryCacheEntryOptions());
+
+                using (var link2 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key2, obj, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(5)));
+                }
+            }
+
+            Assert.Same(obj, cache.Get(key1));
+            Assert.Same(obj, cache.Get(key2));
+
+            clock.Add(TimeSpan.FromSeconds(10));
+
+            object value;
+            Assert.False(cache.TryGetValue(key1, out value));
+            Assert.False(cache.TryGetValue(key2, out value));
+        }
+
+        [Fact]
+        public void AbsoluteExpiration_DoesntAffectSiblingLink()
+        {
+            var clock = new TestClock();
+            var cache = CreateCache(clock);
+            var obj = new object();
+            string key1 = "myKey1";
+            string key2 = "myKey2";
+            string key3 = "myKey3";
+            var expirationToken = new TestExpirationToken() { ActiveChangeCallbacks = true };
+
+            using (var link1 = cache.CreateLinkingScope())
+            {
+                cache.Set(key1, obj, new MemoryCacheEntryOptions());
+
+                using (var link2 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key2, obj, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(5)));
+                }
+
+                using (var link3 = cache.CreateLinkingScope())
+                {
+                    cache.Set(key3, obj, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(15)));
+                }
+            }
+
+            Assert.Same(obj, cache.Get(key1));
+            Assert.Same(obj, cache.Get(key2));
+            Assert.Same(obj, cache.Get(key3));
+
+            clock.Add(TimeSpan.FromSeconds(10));
+
+            object value;
+            Assert.False(cache.TryGetValue(key1, out value));
+            Assert.False(cache.TryGetValue(key2, out value));
+            Assert.True(cache.TryGetValue(key3, out value));
+        }
+
+        [Fact]
         public void GetWithImplicitLinkPopulatesExpirationTokens()
         {
             var cache = CreateCache();
             var obj = new object();
             string key = "myKey";
-            string key1 = "myKey1";
 
             Assert.Null(EntryLinkHelpers.ContextLink);
 
@@ -142,8 +275,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
             Assert.Equal(1, link.ExpirationTokens.Count());
             Assert.Null(link.AbsoluteExpiration);
-
-            cache.Set(key1, obj, new MemoryCacheEntryOptions().AddEntryLink(link));
         }
 
         [Fact]
@@ -152,7 +283,6 @@ namespace Microsoft.Extensions.Caching.Memory
             var cache = CreateCache();
             var obj = new object();
             string key = "myKey";
-            string key1 = "myKey1";
 
             Assert.Null(EntryLinkHelpers.ContextLink);
 
@@ -174,13 +304,6 @@ namespace Microsoft.Extensions.Caching.Memory
             }
 
             Assert.Null(EntryLinkHelpers.ContextLink);
-
-            Assert.Equal(0, link1.ExpirationTokens.Count());
-            Assert.Null(link1.AbsoluteExpiration);
-            Assert.Equal(1, link2.ExpirationTokens.Count());
-            Assert.Null(link2.AbsoluteExpiration);
-
-            cache.Set(key1, obj, new MemoryCacheEntryOptions().AddEntryLink(link2));
         }
 
         [Fact]
@@ -212,7 +335,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            Assert.Equal(1, link1.ExpirationTokens.Count());
+            Assert.Equal(2, link1.ExpirationTokens.Count());
             Assert.NotNull(link1.AbsoluteExpiration);
             Assert.Equal(clock.UtcNow + TimeSpan.FromSeconds(10), link1.AbsoluteExpiration);
 
