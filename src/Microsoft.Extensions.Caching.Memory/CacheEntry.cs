@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ArgumentNullException(nameof(notifyCacheOfExpiration));
             }
-            
+
             Key = key;
             _notifyCacheEntryDisposed = notifyCacheEntryDisposed;
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
@@ -170,9 +170,11 @@ namespace Microsoft.Extensions.Caching.Memory
         internal IList<IDisposable> ExpirationTokenRegistrations { get; set; }
 
         internal DateTimeOffset LastAccessed { get; set; }
-        
+
         public void Dispose()
         {
+            CacheEntryHelper.LeaveScope();
+
             try
             {
                 if (!_added)
@@ -183,7 +185,6 @@ namespace Microsoft.Extensions.Caching.Memory
             }
             finally
             {
-                CacheEntryHelper.LeaveScope();
                 PropageOptions(CacheEntryHelper.Current);
             }
         }
@@ -334,9 +335,12 @@ namespace Microsoft.Extensions.Caching.Memory
             // We do this regardless of it gets cached because the tokens are associated with the value we'll return.
             if (_expirationTokens != null)
             {
-                foreach (var expirationToken in _expirationTokens)
+                lock (_lock)
                 {
-                    parent.AddExpirationToken(expirationToken);
+                    foreach (var expirationToken in _expirationTokens)
+                    {
+                        parent.AddExpirationToken(expirationToken);
+                    }
                 }
             }
 
