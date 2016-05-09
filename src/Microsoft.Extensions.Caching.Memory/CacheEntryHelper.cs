@@ -51,12 +51,9 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 if (Scopes != null)
                 {
-                    lock (Scopes)
+                    if (Scopes.Count > 0)
                     {
-                        if (Scopes.Count > 0)
-                        {
-                            return Scopes.Peek();
-                        }
+                        return Scopes.Peek();
                     }
                 }
 
@@ -71,10 +68,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 Scopes = new Stack<CacheEntry>();
             }
 
-            lock (Scopes)
-            {
-                Scopes.Push(entry);
-            }
+            Scopes.Push(entry);
         }
 
         internal static CacheEntry LeaveScope()
@@ -84,10 +78,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 return null;
             }
 
-            lock (Scopes)
-            {
-                return Scopes.Pop();
-            }
+            return Scopes.Pop();
         }
     }
 }
