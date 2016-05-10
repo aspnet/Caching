@@ -395,9 +395,9 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             });
 
-            var task3 = Task.Run(() =>
+            var task3 = Task.Run(async () =>
             {
-                Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(TimeSpan.FromSeconds(1));
                 cts2.Cancel();
             });
 
