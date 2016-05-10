@@ -8,7 +8,7 @@ using System.Runtime.Remoting.Messaging;
 #endif
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Microsoft.Extensions.Caching.Memory
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.Caching.Memory
             get
             {
                 var scopes = GetOrCreateScopes();
-                return scopes.Top;
+                return scopes.IsEmpty ? null : scopes.Peek();
             }
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var scopes = GetOrCreateScopes();
 
-            var bookmark = new ContextStackBookmark(scopes);
+            var bookmark = new ScopesStackBookmark(scopes);
             Scopes = scopes.Push(entry);
 
             return bookmark;
@@ -77,11 +77,11 @@ namespace Microsoft.Extensions.Caching.Memory
             return scopes;
         }
 
-        sealed class ContextStackBookmark : IDisposable
+        sealed class ScopesStackBookmark : IDisposable
         {
             readonly ImmutableStack<CacheEntry> _bookmark;
 
-            public ContextStackBookmark(ImmutableStack<CacheEntry> bookmark)
+            public ScopesStackBookmark(ImmutableStack<CacheEntry> bookmark)
             {
                 _bookmark = bookmark;
             }
@@ -91,49 +91,5 @@ namespace Microsoft.Extensions.Caching.Memory
                 Scopes = _bookmark;
             }
         }
-    }
-
-    class ImmutableStack<T> : IEnumerable<T>
-    {
-        readonly ImmutableStack<T> _under;
-        readonly T _top;
-
-        ImmutableStack()
-        {
-        }
-
-        ImmutableStack(ImmutableStack<T> under, T top)
-        {
-            if (under == null) throw new ArgumentNullException(nameof(under));
-            _under = under;
-            Count = under.Count + 1;
-            _top = top;
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            var next = this;
-            while (!next.IsEmpty)
-            {
-                yield return next.Top;
-                next = next._under;
-            }
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public int Count { get; }
-
-        public static ImmutableStack<T> Empty { get; } = new ImmutableStack<T>();
-
-        public bool IsEmpty => _under == null;
-
-        public ImmutableStack<T> Push(T t) => new ImmutableStack<T>(this, t);
-
-        public T Top => _top;
-
     }
 }

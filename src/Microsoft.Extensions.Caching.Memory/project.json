@@ -22,7 +22,8 @@
   "dependencies": {
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-*",
     "Microsoft.Extensions.Caching.Abstractions": "1.0.0-*",
-    "Microsoft.Extensions.Options": "1.0.0-*"
+    "Microsoft.Extensions.Options": "1.0.0-*",
+    "System.Collections.Immutable": "1.2.0-*"
   },
   "frameworks": {
     "net451": {
