@@ -370,7 +370,7 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         [Fact]
-        public async Task GetAndSet_AreThreadSafe()
+        public void GetAndSet_AreThreadSafe()
         {
             var cache = CreateCache();
             string key = "myKey";
@@ -395,11 +395,13 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             });
 
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            var task3 = Task.Run(() =>
+            {
+                Task.Delay(TimeSpan.FromSeconds(1));
+                cts2.Cancel();
+            });
 
-            cts2.Cancel();
-
-            Task.WaitAll(task1, task2);
+            Task.WaitAll(task1, task2, task3);
         }
 
         private class TestKey
