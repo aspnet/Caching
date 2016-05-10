@@ -7,6 +7,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 #endif
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -15,9 +16,9 @@ namespace Microsoft.Extensions.Caching.Memory
     internal class CacheEntryHelper
     {
 #if NETSTANDARD1_3 || NETCORE50
-        private static readonly AsyncLocal<Stack<CacheEntry>> _scopes = new AsyncLocal<Stack<CacheEntry>>();
+        private static readonly AsyncLocal<ImmutableStack<CacheEntry>> _scopes = new AsyncLocal<ImmutableStack<CacheEntry>>();
 
-        internal static Stack<CacheEntry> Scopes
+        internal static ImmutableStack<CacheEntry> Scopes
         {
             get { return _scopes.Value; }
             set { _scopes.Value = value; }
@@ -25,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Memory
 #else
         private const string CacheEntryDataName = "CacheEntry.Scopes";
 
-        internal static Stack<CacheEntry> Scopes
+        internal static ImmutableStack<CacheEntry> Scopes
         {
             get
             {
@@ -36,7 +37,7 @@ namespace Microsoft.Extensions.Caching.Memory
                     return null;
                 }
 
-                return handle.Unwrap() as Stack<CacheEntry>;
+                return handle.Unwrap() as ImmutableStack<CacheEntry>;
             }
             set
             {
@@ -49,36 +50,90 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             get
             {
-                if (Scopes != null)
-                {
-                    if (Scopes.Count > 0)
-                    {
-                        return Scopes.Peek();
-                    }
-                }
-
-                return null;
+                var scopes = GetOrCreateScopes();
+                return scopes.Top;
             }
         }
 
-        internal static void EnterScope(CacheEntry entry)
+        internal static IDisposable EnterScope(CacheEntry entry)
         {
-            if (Scopes == null)
-            {
-                Scopes = new Stack<CacheEntry>();
-            }
+            var scopes = GetOrCreateScopes();
 
-            Scopes.Push(entry);
+            var bookmark = new ContextStackBookmark(scopes);
+            Scopes = scopes.Push(entry);
+
+            return bookmark;
         }
 
-        internal static CacheEntry LeaveScope()
+        static ImmutableStack<CacheEntry> GetOrCreateScopes()
         {
-            if (Scopes == null)
+            var scopes = Scopes;
+            if (scopes == null)
             {
-                return null;
+                scopes = ImmutableStack<CacheEntry>.Empty;
+                Scopes = scopes;
             }
 
-            return Scopes.Pop();
+            return scopes;
         }
+
+        sealed class ContextStackBookmark : IDisposable
+        {
+            readonly ImmutableStack<CacheEntry> _bookmark;
+
+            public ContextStackBookmark(ImmutableStack<CacheEntry> bookmark)
+            {
+                _bookmark = bookmark;
+            }
+
+            public void Dispose()
+            {
+                Scopes = _bookmark;
+            }
+        }
+    }
+
+    class ImmutableStack<T> : IEnumerable<T>
+    {
+        readonly ImmutableStack<T> _under;
+        readonly T _top;
+
+        ImmutableStack()
+        {
+        }
+
+        ImmutableStack(ImmutableStack<T> under, T top)
+        {
+            if (under == null) throw new ArgumentNullException(nameof(under));
+            _under = under;
+            Count = under.Count + 1;
+            _top = top;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            var next = this;
+            while (!next.IsEmpty)
+            {
+                yield return next.Top;
+                next = next._under;
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public int Count { get; }
+
+        public static ImmutableStack<T> Empty { get; } = new ImmutableStack<T>();
+
+        public bool IsEmpty => _under == null;
+
+        public ImmutableStack<T> Push(T t) => new ImmutableStack<T>(this, t);
+
+        public T Top => _top;
+
     }
 }

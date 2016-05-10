@@ -30,6 +30,7 @@ namespace Microsoft.Extensions.Caching.Memory
         internal DateTimeOffset? _absoluteExpiration;
         internal TimeSpan? _absoluteExpirationRelativeToNow;
         private TimeSpan? _slidingExpiration;
+        private IDisposable _bookmark;
 
         internal readonly object _lock = new object();
 
@@ -57,7 +58,7 @@ namespace Microsoft.Extensions.Caching.Memory
             _notifyCacheEntryDisposed = notifyCacheEntryDisposed;
             _notifyCacheOfExpiration = notifyCacheOfExpiration;
 
-            CacheEntryHelper.EnterScope(this);
+            _bookmark = CacheEntryHelper.EnterScope(this);
         }
 
         /// <summary>
@@ -170,7 +171,7 @@ namespace Microsoft.Extensions.Caching.Memory
             if (!_added)
             {
                 _added = true;
-                CacheEntryHelper.LeaveScope();
+                _bookmark.Dispose();
                 _notifyCacheEntryDisposed(this);
                 PropageOptions(CacheEntryHelper.Current);
             }
