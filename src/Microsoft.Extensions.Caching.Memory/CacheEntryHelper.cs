@@ -8,7 +8,6 @@ using System.Runtime.Remoting.Messaging;
 #endif
 
 using System;
-using System.Collections.Immutable;
 using System.Threading;
 
 namespace Microsoft.Extensions.Caching.Memory
@@ -16,9 +15,9 @@ namespace Microsoft.Extensions.Caching.Memory
     internal class CacheEntryHelper
     {
 #if NETSTANDARD1_3 || NETCORE50
-        private static readonly AsyncLocal<ImmutableStack<CacheEntry>> _scopes = new AsyncLocal<ImmutableStack<CacheEntry>>();
+        private static readonly AsyncLocal<CacheEntryStack> _scopes = new AsyncLocal<CacheEntryStack>();
 
-        internal static ImmutableStack<CacheEntry> Scopes
+        internal static CacheEntryStack Scopes
         {
             get { return _scopes.Value; }
             set { _scopes.Value = value; }
@@ -26,7 +25,7 @@ namespace Microsoft.Extensions.Caching.Memory
 #else
         private const string CacheEntryDataName = "CacheEntry.Scopes";
 
-        internal static ImmutableStack<CacheEntry> Scopes
+        internal static CacheEntryStack Scopes
         {
             get
             {
@@ -37,7 +36,7 @@ namespace Microsoft.Extensions.Caching.Memory
                     return null;
                 }
 
-                return handle.Unwrap() as ImmutableStack<CacheEntry>;
+                return handle.Unwrap() as CacheEntryStack;
             }
             set
             {
@@ -51,7 +50,7 @@ namespace Microsoft.Extensions.Caching.Memory
             get
             {
                 var scopes = GetOrCreateScopes();
-                return scopes.IsEmpty ? null : scopes.Peek();
+                return scopes.Peek();
             }
         }
 
@@ -59,29 +58,29 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var scopes = GetOrCreateScopes();
 
-            var bookmark = new ScopesStackBookmark(scopes);
+            var bookmark = new CacheEntryStackBookmark(scopes);
             Scopes = scopes.Push(entry);
 
             return bookmark;
         }
 
-        static ImmutableStack<CacheEntry> GetOrCreateScopes()
+        static CacheEntryStack GetOrCreateScopes()
         {
             var scopes = Scopes;
             if (scopes == null)
             {
-                scopes = ImmutableStack<CacheEntry>.Empty;
+                scopes = CacheEntryStack.Empty;
                 Scopes = scopes;
             }
 
             return scopes;
         }
 
-        sealed class ScopesStackBookmark : IDisposable
+        sealed class CacheEntryStackBookmark : IDisposable
         {
-            readonly ImmutableStack<CacheEntry> _bookmark;
+            readonly CacheEntryStack _bookmark;
 
-            public ScopesStackBookmark(ImmutableStack<CacheEntry> bookmark)
+            public CacheEntryStackBookmark(CacheEntryStack bookmark)
             {
                 _bookmark = bookmark;
             }
@@ -90,6 +89,39 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 Scopes = _bookmark;
             }
+        }
+    }
+
+    class CacheEntryStack
+    {
+        private readonly CacheEntryStack _previous;
+        private readonly CacheEntry _entry;
+
+        private CacheEntryStack()
+        {
+        }
+
+        CacheEntryStack(CacheEntryStack previous, CacheEntry entry)
+        {
+            if (previous == null)
+            {
+                throw new ArgumentNullException(nameof(previous));
+            }
+
+            _previous = previous;
+            _entry = entry;
+        }
+
+        public static CacheEntryStack Empty { get; } = new CacheEntryStack();
+
+        public CacheEntryStack Push(CacheEntry c)
+        {
+            return new CacheEntryStack(this, c);
+        }
+
+        public CacheEntry Peek()
+        {
+            return _entry;
         }
     }
 }
