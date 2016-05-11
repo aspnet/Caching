@@ -471,11 +471,11 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.NotEqual(value3, value4);
 
             t3.Fire();
-            value3 = cache.Set(key3, Guid.NewGuid());
             Assert.Equal(value4, cache.Get(key4));
 
             Assert.Null(cache.Get(key1));
             Assert.Null(cache.Get(key2));
+            Assert.Null(cache.Get(key3));
 
             await func();
 
@@ -486,11 +486,11 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.NotEqual(value3, value4);
 
             t4.Fire();
-            value4 = cache.Set(key4, Guid.NewGuid());
             Assert.Equal(value3, cache.Get(key3));
 
             Assert.Null(cache.Get(key1));
             Assert.Null(cache.Get(key2));
+            Assert.Null(cache.Get(key4));
         }
     }
 }
