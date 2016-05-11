@@ -3,11 +3,10 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Caching.Memory.Infrastructure;
-using Microsoft.Extensions.Caching;
-using Xunit;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory.Infrastructure;
+using Microsoft.Extensions.Internal;
+using Xunit;
 
 namespace Microsoft.Extensions.Caching.Memory
 {

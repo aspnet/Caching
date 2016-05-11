@@ -58,13 +58,13 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var scopes = GetOrCreateScopes();
 
-            var bookmark = new CacheEntryStackBookmark(scopes);
+            var scopeLease = new ScopeLease(scopes);
             Scopes = scopes.Push(entry);
 
-            return bookmark;
+            return scopeLease;
         }
 
-        static CacheEntryStack GetOrCreateScopes()
+        private static CacheEntryStack GetOrCreateScopes()
         {
             var scopes = Scopes;
             if (scopes == null)
@@ -76,52 +76,19 @@ namespace Microsoft.Extensions.Caching.Memory
             return scopes;
         }
 
-        sealed class CacheEntryStackBookmark : IDisposable
+        private sealed class ScopeLease : IDisposable
         {
-            readonly CacheEntryStack _bookmark;
+            readonly CacheEntryStack _cacheEntryStack;
 
-            public CacheEntryStackBookmark(CacheEntryStack bookmark)
+            public ScopeLease(CacheEntryStack cacheEntryStack)
             {
-                _bookmark = bookmark;
+                _cacheEntryStack = cacheEntryStack;
             }
 
             public void Dispose()
             {
-                Scopes = _bookmark;
+                Scopes = _cacheEntryStack;
             }
-        }
-    }
-
-    class CacheEntryStack
-    {
-        private readonly CacheEntryStack _previous;
-        private readonly CacheEntry _entry;
-
-        private CacheEntryStack()
-        {
-        }
-
-        CacheEntryStack(CacheEntryStack previous, CacheEntry entry)
-        {
-            if (previous == null)
-            {
-                throw new ArgumentNullException(nameof(previous));
-            }
-
-            _previous = previous;
-            _entry = entry;
-        }
-
-        public static CacheEntryStack Empty { get; } = new CacheEntryStack();
-
-        public CacheEntryStack Push(CacheEntry c)
-        {
-            return new CacheEntryStack(this, c);
-        }
-
-        public CacheEntry Peek()
-        {
-            return _entry;
         }
     }
 }
