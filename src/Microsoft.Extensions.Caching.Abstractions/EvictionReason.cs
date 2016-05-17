@@ -31,5 +31,10 @@ namespace Microsoft.Extensions.Caching.Memory
         /// GC, overflow
         /// </summary>
         Capacity,
+
+        /// <summary>
+        /// GC, weakReference
+        /// </summary>
+        Collected,
     }
 }
