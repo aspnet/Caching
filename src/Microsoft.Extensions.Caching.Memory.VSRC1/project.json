@@ -12,7 +12,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc2-final",
     "Microsoft.Extensions.Caching.Abstractions.VSRC1": "1.0.0-rc1-final",
     "Microsoft.Extensions.OptionsModel.VSRC1": "1.0.0-rc1-final"
   },
