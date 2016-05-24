@@ -28,5 +28,10 @@
         "portable-net451+win8"
       ]
     }
+  },
+  "tools": {
+    "Microsoft.Extensions.Caching.SqlConfig.Tools": {
+      "version": "1.0.0-*"
+    }
   }
 }
