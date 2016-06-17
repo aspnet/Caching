@@ -316,6 +316,15 @@ namespace Microsoft.Extensions.Caching.Memory
                     {
                         expiredEntries.Add(entry);
                     }
+                    else
+                    {
+                        var wr = entry.Value as WeakReference;
+                        if (wr != null && !wr.IsAlive)
+                        {
+                            entry.SetExpired(EvictionReason.Collected);
+                            expiredEntries.Add(entry);
+                        }
+                    }
                 }
             }
             finally
@@ -368,23 +377,32 @@ namespace Microsoft.Extensions.Caching.Memory
                     }
                     else
                     {
-                        switch (entry.Priority)
+                        var wr = entry.Value as WeakReference;
+                        if (wr != null && !wr.IsAlive)
                         {
-                            case CacheItemPriority.Low:
-                                lowPriEntries.Add(entry);
-                                break;
-                            case CacheItemPriority.Normal:
-                                normalPriEntries.Add(entry);
-                                break;
-                            case CacheItemPriority.High:
-                                highPriEntries.Add(entry);
-                                break;
-                            case CacheItemPriority.NeverRemove:
-                                neverRemovePriEntries.Add(entry);
-                                break;
-                            default:
-                                System.Diagnostics.Debug.Assert(false, "Not implemented: " + entry.Priority);
-                                break;
+                            entry.SetExpired(EvictionReason.Collected);
+                            expiredEntries.Add(entry);
+                        }
+                        else
+                        {
+                            switch (entry.Priority)
+                            {
+                                case CacheItemPriority.Low:
+                                    lowPriEntries.Add(entry);
+                                    break;
+                                case CacheItemPriority.Normal:
+                                    normalPriEntries.Add(entry);
+                                    break;
+                                case CacheItemPriority.High:
+                                    highPriEntries.Add(entry);
+                                    break;
+                                case CacheItemPriority.NeverRemove:
+                                    neverRemovePriEntries.Add(entry);
+                                    break;
+                                default:
+                                    System.Diagnostics.Debug.Assert(false, "Not implemented: " + entry.Priority);
+                                    break;
+                            }
                         }
                     }
                 }
