@@ -12,7 +12,7 @@ namespace MemoryCacheFileWatchSample
     {
         public static void Main(string[] args)
         {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
+            var cache = new MemoryCache(new MemoryCacheOptions());
             var greeting = "";
             var cacheKey = "cache_key";
             var fileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Files"));
@@ -21,9 +21,8 @@ namespace MemoryCacheFileWatchSample
             {
                 if (!cache.TryGetValue(cacheKey, out greeting))
                 {
-                    greeting = "Hello world";
+                    greeting = File.ReadAllText((Path.Combine(Directory.GetCurrentDirectory(), "Files", "example.txt")));
                     cache.Set(cacheKey, greeting, new MemoryCacheEntryOptions()
-                         .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
                          //Telling the cache to depend on the IChangeToken from watching examples.txt
                          .AddExpirationToken(fileProvider.Watch("example.txt"))
                          .RegisterPostEvictionCallback(
@@ -32,7 +31,6 @@ namespace MemoryCacheFileWatchSample
                              Console.WriteLine($"{echoKey} : {value} was evicted due to {reason}");
                          }));
                     Console.WriteLine($"{cacheKey} updated from source.");
-
                 }
                 else
                 {
