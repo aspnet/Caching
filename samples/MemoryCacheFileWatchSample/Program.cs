@@ -15,13 +15,13 @@ namespace MemoryCacheFileWatchSample
             var cache = new MemoryCache(new MemoryCacheOptions());
             var greeting = "";
             var cacheKey = "cache_key";
-            var fileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Files"));
+            var fileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "WatchedFiles"));
 
             while (true)
             {
                 if (!cache.TryGetValue(cacheKey, out greeting))
                 {
-                    greeting = File.ReadAllText((Path.Combine(Directory.GetCurrentDirectory(), "Files", "example.txt")));
+                    greeting = File.ReadAllText((Path.Combine(Directory.GetCurrentDirectory(), "WatchedFiles", "example.txt")));
                     cache.Set(cacheKey, greeting, new MemoryCacheEntryOptions()
                          //Telling the cache to depend on the IChangeToken from watching examples.txt
                          .AddExpirationToken(fileProvider.Watch("example.txt"))
