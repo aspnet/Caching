@@ -15,22 +15,26 @@ namespace MemoryCacheFileWatchSample
             var cache = new MemoryCache(new MemoryCacheOptions());
             var greeting = "";
             var cacheKey = "cache_key";
+            var input = String.Empty;
             var fileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "WatchedFiles"));
 
-            while (true)
+            while (input != "Escape")
             {
                 if (!cache.TryGetValue(cacheKey, out greeting))
                 {
-                    greeting = File.ReadAllText((Path.Combine(Directory.GetCurrentDirectory(), "WatchedFiles", "example.txt")));
-                    cache.Set(cacheKey, greeting, new MemoryCacheEntryOptions()
-                         //Telling the cache to depend on the IChangeToken from watching examples.txt
-                         .AddExpirationToken(fileProvider.Watch("example.txt"))
-                         .RegisterPostEvictionCallback(
-                         (echoKey, value, reason, substate) =>
-                         {
-                             Console.WriteLine($"{echoKey} : {value} was evicted due to {reason}");
-                         }));
-                    Console.WriteLine($"{cacheKey} updated from source.");
+                    using (StreamReader streamReader = new StreamReader(fileProvider.GetFileInfo("example.txt").CreateReadStream()))
+                    {
+                        greeting = streamReader.ReadToEnd();
+                        cache.Set(cacheKey, greeting, new MemoryCacheEntryOptions()
+                             //Telling the cache to depend on the IChangeToken from watching examples.txt
+                             .AddExpirationToken(fileProvider.Watch("example.txt"))
+                             .RegisterPostEvictionCallback(
+                             (echoKey, value, reason, substate) =>
+                             {
+                                 Console.WriteLine($"{echoKey} : {value} was evicted due to {reason}");
+                             }));
+                        Console.WriteLine($"{cacheKey} updated from source.");
+                    }
                 }
                 else
                 {
@@ -38,8 +42,8 @@ namespace MemoryCacheFileWatchSample
                 }
 
                 Console.WriteLine(greeting);
-                Console.ReadKey();
-                Console.WriteLine();
+                Console.WriteLine("Press any key to continue. Press the ESC key to exit");
+                input = Console.ReadKey(true).Key.ToString();
             }
         }
     }
