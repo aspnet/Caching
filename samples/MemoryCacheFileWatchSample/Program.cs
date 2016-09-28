@@ -15,10 +15,9 @@ namespace MemoryCacheFileWatchSample
             var cache = new MemoryCache(new MemoryCacheOptions());
             var greeting = "";
             var cacheKey = "cache_key";
-            var input = String.Empty;
             var fileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "WatchedFiles"));
 
-            while (input != "Escape")
+            do
             {
                 if (!cache.TryGetValue(cacheKey, out greeting))
                 {
@@ -43,8 +42,8 @@ namespace MemoryCacheFileWatchSample
 
                 Console.WriteLine(greeting);
                 Console.WriteLine("Press any key to continue. Press the ESC key to exit");
-                input = Console.ReadKey(true).Key.ToString();
             }
+            while (Console.ReadKey(true).Key != ConsoleKey.Escape);
         }
     }
 }
