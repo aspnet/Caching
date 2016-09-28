@@ -21,7 +21,7 @@ namespace MemoryCacheFileWatchSample
             {
                 if (!cache.TryGetValue(cacheKey, out greeting))
                 {
-                    using (StreamReader streamReader = new StreamReader(fileProvider.GetFileInfo("example.txt").CreateReadStream()))
+                    using (var streamReader = new StreamReader(fileProvider.GetFileInfo("example.txt").CreateReadStream()))
                     {
                         greeting = streamReader.ReadToEnd();
                         cache.Set(cacheKey, greeting, new MemoryCacheEntryOptions()
