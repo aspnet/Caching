@@ -4,8 +4,8 @@
   },
   "dependencies": {
     "Microsoft.Extensions.Caching.SqlServer": "1.0.0",
-    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.1",
+    "Microsoft.Extensions.Configuration.Json": "1.0.1",
     "Microsoft.Extensions.Options": "1.0.0",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0"
   },
