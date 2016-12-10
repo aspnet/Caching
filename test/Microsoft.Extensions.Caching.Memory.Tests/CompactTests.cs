@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Extensions.Internal;
 using Xunit;
+using System.Threading;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
@@ -17,6 +18,117 @@ namespace Microsoft.Extensions.Caching.Memory
                 CompactOnMemoryPressure = false,
             });
         }
+
+        private MemoryCache CreateCacheCompactOnMemoryPressure(ISystemClock clock = null)
+        {
+            return new MemoryCache(new MemoryCacheOptions()
+            {
+                Clock = clock,
+                CompactOnMemoryPressure = true,
+            });
+        }
+
+        private MemoryCache CreateCacheCompactOnMemoryPressureCustom(ISystemClock clock = null)
+        {
+            return new MemoryCache(new MemoryCacheOptions()
+            {
+                Clock = clock,
+                CompactOnMemoryPressure = true,
+                CustomCompactOnMemoryPressureDelegate = CustomDelegateCompact
+            });
+        }
+
+
+        private void CustomDelegateCompact(MemoryCache cache)
+        {
+            if(cache.Count > 100)
+            {
+                cache.Compact(0.5);
+            }
+        }
+
+
+        [Fact]
+        public void CompactCacheOnMemoryPressureDefault()
+        {
+            var cache = CreateCacheCompactOnMemoryPressure();
+            int numberM = 100;
+            for (int i = 0; i < numberM; i++)
+            {
+                cache.Set<int>(i.ToString(), i);
+            }
+
+            Assert.True(cache.Count == numberM);
+            int numberOfGen2 = GC.CollectionCount(2);
+
+            GC.Collect(0, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(1, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.WaitForPendingFinalizers();
+
+            int numberOfGen2B = GC.CollectionCount(2);
+
+            for (int i = 0; i < numberOfGen2B-numberOfGen2; i++)
+            {
+                numberM = numberM - (int)((double) numberM * 0.1);
+            }
+
+            Assert.True(cache.Count <= numberM);
+        }
+
+
+        [Fact]
+        public void CompactCacheOnMemoryPressureCustom()
+        {
+            var cache = CreateCacheCompactOnMemoryPressureCustom();
+            int numberM = 100;
+            int number2M = 200;
+            for (int i = 0; i < numberM; i++)
+            {
+                cache.Set<int>(i.ToString(), i);
+            }
+
+            Assert.True(cache.Count == numberM);
+
+            GC.Collect(0, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(1, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.WaitForPendingFinalizers();
+
+            Assert.True(cache.Count == numberM);
+
+            for (int i = numberM; i < number2M; i++)
+            {
+                cache.Set<int>(i.ToString(), i);
+            }
+
+            Assert.True(cache.Count == number2M);
+
+            GC.Collect(0, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(1, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            Thread.Sleep(100);
+            GC.WaitForPendingFinalizers();
+
+            Assert.True(cache.Count <= numberM);
+
+
+        }
+
 
         [Fact]
         public void CompactEmptyNoOps()

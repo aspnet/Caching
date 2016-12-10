@@ -4,14 +4,18 @@
 using System;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
     public class MemoryCacheOptions : IOptions<MemoryCacheOptions>
     {
+
         public ISystemClock Clock { get; set; }
 
         public bool CompactOnMemoryPressure { get; set; } = true;
+
+        public Action<MemoryCache> CustomCompactOnMemoryPressureDelegate { get; set; }
 
         public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
 
