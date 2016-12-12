@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
@@ -33,6 +34,8 @@ namespace Microsoft.Extensions.Caching.Redis
 
         private readonly RedisCacheOptions _options;
         private readonly string _instance;
+
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
 
         public RedisCache(IOptions<RedisCacheOptions> optionsAccessor)
         {
@@ -155,19 +158,35 @@ namespace Microsoft.Extensions.Caching.Redis
 
         private void Connect()
         {
-            if (_connection == null)
+            _connectionLock.Wait();
+            try
             {
-                _connection = ConnectionMultiplexer.Connect(_options.Configuration);
-                _cache = _connection.GetDatabase();
+                if (_connection == null)
+                {
+                    _connection = ConnectionMultiplexer.Connect(_options.Configuration);
+                    _cache = _connection.GetDatabase();
+                }
+            }
+            finally
+            {
+                _connectionLock.Release();
             }
         }
 
         private async Task ConnectAsync()
         {
-            if (_connection == null)
+            await _connectionLock.WaitAsync();
+            try
             {
-                _connection = await ConnectionMultiplexer.ConnectAsync(_options.Configuration);
-                _cache = _connection.GetDatabase();
+                if (_connection == null)
+                {
+                    _connection = await ConnectionMultiplexer.ConnectAsync(_options.Configuration);
+                    _cache = _connection.GetDatabase();
+                }
+            }
+            finally
+            {
+                _connectionLock.Release();
             }
         }
 
