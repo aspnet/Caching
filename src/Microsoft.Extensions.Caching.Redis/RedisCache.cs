@@ -29,13 +29,13 @@ namespace Microsoft.Extensions.Caching.Redis
         private const string DataKey = "data";
         private const long NotPresent = -1;
 
-        private ConnectionMultiplexer _connection;
+        private volatile ConnectionMultiplexer _connection;
         private IDatabase _cache;
 
         private readonly RedisCacheOptions _options;
         private readonly string _instance;
 
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         public RedisCache(IOptions<RedisCacheOptions> optionsAccessor)
         {
@@ -158,6 +158,11 @@ namespace Microsoft.Extensions.Caching.Redis
 
         private void Connect()
         {
+            if (_connection != null)
+            {
+                return;
+            }
+
             _connectionLock.Wait();
             try
             {
@@ -175,6 +180,11 @@ namespace Microsoft.Extensions.Caching.Redis
 
         private async Task ConnectAsync()
         {
+            if (_connection != null)
+            {
+                return;
+            }
+
             await _connectionLock.WaitAsync();
             try
             {
