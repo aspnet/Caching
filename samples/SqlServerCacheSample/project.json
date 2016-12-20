@@ -23,5 +23,10 @@
         }
       }
     }
+  },
+  "tools": {
+    "Microsoft.Extensions.Caching.SqlConfig.Tools": {
+      "version": "1.0.0-*"
+    }
   }
 }
