@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "In-memory cache implementation of Microsoft.Extensions.Caching.Memory.IMemoryCache.",
   "packOptions": {
     "repository": {
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.1",
-    "Microsoft.Extensions.Caching.Abstractions": "1.0.1",
-    "Microsoft.Extensions.Options": "1.0.1"
+    "Microsoft.Extensions.Caching.Abstractions": "1.0.2",
+    "Microsoft.Extensions.Options": "1.0.2"
   },
   "frameworks": {
     "net451": {

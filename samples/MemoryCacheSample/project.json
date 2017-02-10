@@ -3,7 +3,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.Extensions.Caching.Memory": "1.0.1"
+    "Microsoft.Extensions.Caching.Memory": "1.0.2"
   },
   "frameworks": {
     "net451": {},

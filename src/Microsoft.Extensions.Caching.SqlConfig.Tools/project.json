@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0-preview4-final",
+  "version": "1.0.0-preview4-update1",
   "dependencies": {
     "Microsoft.Extensions.CommandLineUtils": "1.0.1",
-    "Microsoft.Extensions.Logging": "1.0.1",
-    "Microsoft.Extensions.Logging.Console": "1.0.1",
+    "Microsoft.Extensions.Logging": "1.0.2",
+    "Microsoft.Extensions.Logging.Console": "1.0.2",
     "System.Data.SqlClient": "4.1.0"
   },
   "description": "Command line tool to create tables and indexes in a Microsoft SQL Server database for distributed caching.",
