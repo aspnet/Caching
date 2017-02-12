@@ -33,6 +33,7 @@ namespace MemoryCacheMaintainMaxCount
                      }
                  };
 
+            // # Step - 2
             // We need a place it into options
             MemoryCacheOptions memoryCacheOptions = new MemoryCacheOptions
             {
@@ -46,14 +47,16 @@ namespace MemoryCacheMaintainMaxCount
             }; 
             MemoryCache cache = new MemoryCache(memoryCacheOptions);
 
+            // # Step - 3
             // Fill the cache with 
-           for(int i = 0;i < maxCount+5000; i++)
+            for (int i = 0;i < maxCount+5000; i++)
             {
                 cache.Set<int>($"Key_{i}", Random.Next(maxCount), _cacheEntryOptions);
             }
 
             Console.WriteLine($"Cache filled with count{cache.Count}");
 
+            // # Step - 4
             Console.WriteLine($"Make garbage collections");
             Object g2 = new object();
             GC.Collect();
@@ -65,6 +68,7 @@ namespace MemoryCacheMaintainMaxCount
             Console.WriteLine($"Cache after GC collection has filled with count{cache.Count}");
             Console.ReadLine();
             Console.WriteLine("Shutting down");
+
         }
 
         private static void SetKey(IMemoryCache cache, string value)
