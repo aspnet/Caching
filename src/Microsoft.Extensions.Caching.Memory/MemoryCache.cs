@@ -313,6 +313,12 @@ namespace Microsoft.Extensions.Caching.Memory
         /// ?. Larger objects - estimated by object graph size, inaccurate.
         public void Compact(double percentage)
         {
+            int removalCountTarget = (int)(_entries.Count * percentage);
+            CompactByRemovalCountTarget(removalCountTarget);
+        }
+
+        public void CompactByRemovalCountTarget(int removalCountTarget)
+        {
             var entriesToRemove = new List<CacheEntry>();
             var lowPriEntries = new List<CacheEntry>();
             var normalPriEntries = new List<CacheEntry>();
@@ -347,7 +353,6 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            int removalCountTarget = (int)(_entries.Count * percentage);
 
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, lowPriEntries);
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
