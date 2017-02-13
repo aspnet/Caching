@@ -1,8 +1,8 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": {
-    "Microsoft.Extensions.Caching.Abstractions": "1.0.1",
-    "Microsoft.Extensions.Options": "1.0.1"
+    "Microsoft.Extensions.Caching.Abstractions": "1.0.2",
+    "Microsoft.Extensions.Options": "1.0.2"
   },
   "description": "Distributed cache implementation of Microsoft.Extensions.Caching.Distributed.IDistributedCache using Microsoft SQL Server.",
   "buildOptions": {

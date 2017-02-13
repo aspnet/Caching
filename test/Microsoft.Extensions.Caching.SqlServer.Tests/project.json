@@ -6,9 +6,9 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-rc3-000000-01",
     "Microsoft.AspNetCore.Testing": "1.0.1",
-    "Microsoft.Extensions.Caching.SqlServer": "1.0.1",
-    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.1",
-    "Microsoft.Extensions.Configuration.Json": "1.0.1",
+    "Microsoft.Extensions.Caching.SqlServer": "1.0.2",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.2",
+    "Microsoft.Extensions.Configuration.Json": "1.0.2",
     "Microsoft.Extensions.DependencyInjection": "1.0.1",
     "xunit": "2.1.0"
   },
@@ -25,7 +25,7 @@
       ],
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.3",
+          "version": "1.0.4",
           "type": "platform"
         },
         "moq.netcore": "4.4.0-beta8",
