@@ -9,7 +9,7 @@
     "Microsoft.Extensions.Caching.SqlServer": "1.0.2",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.2",
     "Microsoft.Extensions.Configuration.Json": "1.0.2",
-    "Microsoft.Extensions.DependencyInjection": "1.0.1",
+    "Microsoft.Extensions.DependencyInjection": "1.0.2",
     "xunit": "2.1.0"
   },
   "publishOptions": {
