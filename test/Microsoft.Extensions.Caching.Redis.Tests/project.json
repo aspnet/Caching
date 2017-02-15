@@ -2,7 +2,7 @@
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
     "Microsoft.AspNetCore.Testing": "1.1.0-rtm-22752",
-    "Microsoft.Extensions.Caching.Redis": "1.1.0",
+    "Microsoft.Extensions.Caching.Redis": "1.1.1",
     "Microsoft.Extensions.DependencyInjection": "1.1.0",
     "Moq": "4.6.36-*",
     "xunit": "2.2.0-*"
@@ -12,7 +12,7 @@
     "netcoreapp1.1": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.1.0",
+          "version": "1.1.1",
           "type": "platform"
         }
       }
