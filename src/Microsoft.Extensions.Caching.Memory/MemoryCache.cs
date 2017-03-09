@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
@@ -48,10 +47,6 @@ namespace Microsoft.Extensions.Caching.Memory
             _entryExpirationNotification = EntryExpired;
 
             _clock = options.Clock ?? new SystemClock();
-            if (options.CompactOnMemoryPressure)
-            {
-                GcNotification.Register(DoMemoryPreassureCollection, state: null);
-            }
             _expirationScanFrequency = options.ExpirationScanFrequency;
             _lastExpirationScan = _clock.UtcNow;
         }
@@ -236,7 +231,7 @@ namespace Microsoft.Extensions.Caching.Memory
             StartScanForExpiredItems();
         }
 
-        private void RemoveEntry(CacheEntry entry)
+        public void RemoveEntry(CacheEntry entry)
         {
             if (EntriesCollection.Remove(new KeyValuePair<object, CacheEntry>(entry.Key, entry)))
             {
@@ -272,114 +267,6 @@ namespace Microsoft.Extensions.Caching.Memory
                 if (entry.CheckExpired(now))
                 {
                     cache.RemoveEntry(entry);
-                }
-            }
-        }
-
-        /// This is called after a Gen2 garbage collection. We assume this means there was memory pressure.
-        /// Remove at least 10% of the total entries (or estimated memory?).
-        private bool DoMemoryPreassureCollection(object state)
-        {
-            if (_disposed)
-            {
-                return false;
-            }
-
-            Compact(0.10);
-
-            return true;
-        }
-
-        /// Remove at least the given percentage (0.10 for 10%) of the total entries (or estimated memory?), according to the following policy:
-        /// 1. Remove all expired items.
-        /// 2. Bucket by CacheItemPriority.
-        /// 3. Least recently used objects.
-        /// ?. Items with the soonest absolute expiration.
-        /// ?. Items with the soonest sliding expiration.
-        /// ?. Larger objects - estimated by object graph size, inaccurate.
-        public void Compact(double percentage)
-        {
-            var entriesToRemove = new List<CacheEntry>();
-            var lowPriEntries = new List<CacheEntry>();
-            var normalPriEntries = new List<CacheEntry>();
-            var highPriEntries = new List<CacheEntry>();
-
-            // Sort items by expired & priority status
-            var now = _clock.UtcNow;
-            foreach (var entry in _entries.Values)
-            {
-                if (entry.CheckExpired(now))
-                {
-                    entriesToRemove.Add(entry);
-                }
-                else
-                {
-                    switch (entry.Priority)
-                    {
-                        case CacheItemPriority.Low:
-                            lowPriEntries.Add(entry);
-                            break;
-                        case CacheItemPriority.Normal:
-                            normalPriEntries.Add(entry);
-                            break;
-                        case CacheItemPriority.High:
-                            highPriEntries.Add(entry);
-                            break;
-                        case CacheItemPriority.NeverRemove:
-                            break;
-                        default:
-                            throw new NotSupportedException("Not implemented: " + entry.Priority);
-                    }
-                }
-            }
-
-            int removalCountTarget = (int)(_entries.Count * percentage);
-
-            ExpirePriorityBucket(removalCountTarget, entriesToRemove, lowPriEntries);
-            ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
-            ExpirePriorityBucket(removalCountTarget, entriesToRemove, highPriEntries);
-
-            foreach (var entry in entriesToRemove)
-            {
-                RemoveEntry(entry);
-            }
-        }
-
-        /// Policy:
-        /// 1. Least recently used objects.
-        /// ?. Items with the soonest absolute expiration.
-        /// ?. Items with the soonest sliding expiration.
-        /// ?. Larger objects - estimated by object graph size, inaccurate.
-        private void ExpirePriorityBucket(int removalCountTarget, List<CacheEntry> entriesToRemove, List<CacheEntry> priorityEntries)
-        {
-            // Do we meet our quota by just removing expired entries?
-            if (removalCountTarget <= entriesToRemove.Count)
-            {
-                // No-op, we've met quota
-                return;
-            }
-            if (entriesToRemove.Count + priorityEntries.Count <= removalCountTarget)
-            {
-                // Expire all of the entries in this bucket
-                foreach (var entry in priorityEntries)
-                {
-                    entry.SetExpired(EvictionReason.Capacity);
-                }
-                entriesToRemove.AddRange(priorityEntries);
-                return;
-            }
-
-            // Expire enough entries to reach our goal
-            // TODO: Refine policy
-
-            // LRU
-            foreach (var entry in priorityEntries.OrderBy(entry => entry.LastAccessed))
-            {
-                entry.SetExpired(EvictionReason.Capacity);
-                entriesToRemove.Add(entry);
-                if (removalCountTarget <= entriesToRemove.Count)
-                {
-                    break;
                 }
             }
         }

@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Memory
         /// Gets or sets an absolute expiration date for the cache entry.
         /// </summary>
         DateTimeOffset? AbsoluteExpiration { get; set; }
-        
+
         /// <summary>
         /// Gets or sets an absolute expiration time, relative to now.
         /// </summary>

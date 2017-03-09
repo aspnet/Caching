@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    internal class CacheEntry : ICacheEntry
+    public class CacheEntry : ICacheEntry
     {
         private bool _added = false;
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;
@@ -157,7 +157,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public object Value { get; set; }
 
-        internal DateTimeOffset LastAccessed { get; set; }
+        public DateTimeOffset LastAccessed { get; set; }
 
         internal EvictionReason EvictionReason { get; private set; }
 
@@ -172,7 +172,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        internal bool CheckExpired(DateTimeOffset now)
+        public bool CheckExpired(DateTimeOffset now)
         {
             return _isExpired || CheckForExpiredTime(now) || CheckForExpiredTokens();
         }
