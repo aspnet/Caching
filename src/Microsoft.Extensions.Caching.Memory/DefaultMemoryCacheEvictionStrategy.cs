@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.Extensions.Caching.Memory
 {
     // Just remove expired entries
-    public class DefaultMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy<CacheEntry>
+    public class DefaultMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
         public IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
         {

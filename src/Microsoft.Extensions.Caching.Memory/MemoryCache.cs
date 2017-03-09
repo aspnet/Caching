@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
-        private readonly IMemoryCacheEvictionStrategy<CacheEntry> _evictionStrategy;
+        private readonly IMemoryCacheEvictionStrategy _evictionStrategy;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;

@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    public interface IMemoryCacheEvictionStrategy<TCacheEntry> where TCacheEntry : ICacheEntry
+    public interface IMemoryCacheEvictionStrategy
     {
         // doc comments, returns a list of entries entry to evict
-        IEnumerable<TCacheEntry> GetEntriesToEvict(IEnumerable<TCacheEntry> entries, DateTimeOffset now);
+        IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now);
     }
 }
