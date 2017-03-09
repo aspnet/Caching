@@ -39,12 +39,6 @@ namespace MemoryCacheSample
 
             // Cache entry configuration:
 
-            // Stays in the cache as long as possible
-            result = cache.Set(
-                key,
-                new object(),
-                new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove));
-
             // Automatically remove if not accessed in the given time
             result = cache.Set(
                 key,

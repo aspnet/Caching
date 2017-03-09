@@ -9,19 +9,6 @@ namespace Microsoft.Extensions.Caching.Memory
     public static class MemoryCacheEntryExtensions
     {
         /// <summary>
-        /// Sets the priority for keeping the cache entry in the cache during a memory pressure tokened cleanup.
-        /// </summary>
-        /// <param name="options"></param>
-        /// <param name="priority"></param>
-        public static MemoryCacheEntryOptions SetPriority(
-            this MemoryCacheEntryOptions options,
-            CacheItemPriority priority)
-        {
-            options.Priority = priority;
-            return options;
-        }
-
-        /// <summary>
         /// Expire the cache entry if the given <see cref="IChangeToken"/> expires.
         /// </summary>
         /// <param name="options">The <see cref="MemoryCacheEntryOptions"/>.</param>

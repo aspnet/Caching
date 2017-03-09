@@ -147,12 +147,6 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        /// <summary>
-        /// Gets or sets the priority for keeping the cache entry in the cache during a
-        /// memory pressure triggered cleanup. The default is <see cref="CacheItemPriority.Normal"/>.
-        /// </summary>
-        public CacheItemPriority Priority { get; set; } = CacheItemPriority.Normal;
-
         public object Key { get; private set; }
 
         public object Value { get; set; }

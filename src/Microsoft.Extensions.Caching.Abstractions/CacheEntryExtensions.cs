@@ -8,18 +8,6 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public static class CacheEntryExtensions
     {
-        /// <summary>
-        /// Sets the priority for keeping the cache entry in the cache during a memory pressure tokened cleanup.
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="priority"></param>
-        public static ICacheEntry SetPriority(
-            this ICacheEntry entry,
-            CacheItemPriority priority)
-        {
-            entry.Priority = priority;
-            return entry;
-        }
 
         /// <summary>
         /// Expire the cache entry if the given <see cref="IChangeToken"/> expires.
@@ -148,7 +136,6 @@ namespace Microsoft.Extensions.Caching.Memory
             entry.AbsoluteExpiration = options.AbsoluteExpiration;
             entry.AbsoluteExpirationRelativeToNow = options.AbsoluteExpirationRelativeToNow;
             entry.SlidingExpiration = options.SlidingExpiration;
-            entry.Priority = options.Priority;
 
             foreach (var expirationToken in options.ExpirationTokens)
             {
