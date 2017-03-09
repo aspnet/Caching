@@ -9,16 +9,6 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public class DefaultMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy<CacheEntry>
     {
-        private readonly MemoryCache _cache;
-        private readonly MemoryCacheOptions _options;
-
-        public DefaultMemoryCacheEvictionStrategy(MemoryCache cache, MemoryCacheOptions options)
-        {
-            // TODO: check nulls
-            _cache = cache;
-            _options = options;
-        }
-
         /// Remove at least the given percentage (0.10 for 10%) of the total entries (or estimated memory?), according to the following policy:
         /// 1. Remove all expired items.
         /// 2. Bucket by CacheItemPriority.
@@ -26,10 +16,10 @@ namespace Microsoft.Extensions.Caching.Memory
         /// ?. Items with the soonest absolute expiration.
         /// ?. Items with the soonest sliding expiration.
         /// ?. Larger objects - estimated by object graph size, inaccurate.
-        public bool Compact(IEnumerable<CacheEntry> entries)
+        public IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
         {
-            // For illustration, say remove 10% every compact
-            var percentage = 0.1;
+            // For testing, only remove expired entries
+            var percentage = 0D;
 
             var entriesToRemove = new List<CacheEntry>();
             var lowPriEntries = new List<CacheEntry>();
@@ -37,7 +27,6 @@ namespace Microsoft.Extensions.Caching.Memory
             var highPriEntries = new List<CacheEntry>();
 
             // Sort items by expired & priority status
-            var now = _options.Clock.UtcNow;
             foreach (var entry in entries)
             {
                 if (entry.CheckExpired(now))
@@ -71,12 +60,7 @@ namespace Microsoft.Extensions.Caching.Memory
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, highPriEntries);
 
-            foreach (var entry in entriesToRemove)
-            {
-                _cache.RemoveEntry(entry);
-            }
-
-            return entriesToRemove.Count > 0;
+            return entriesToRemove;
         }
 
         /// Policy:

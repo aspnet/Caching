@@ -26,9 +26,12 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
+        private readonly IMemoryCacheEvictionStrategy<CacheEntry> _evictionStrategy;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
+
+        private Timer _evictionTimer;
 
         /// <summary>
         /// Creates a new <see cref="MemoryCache"/> instance.
@@ -47,8 +50,11 @@ namespace Microsoft.Extensions.Caching.Memory
             _entryExpirationNotification = EntryExpired;
 
             _clock = options.Clock ?? new SystemClock();
+            _evictionStrategy = options.EvictionStrategy ?? new DefaultMemoryCacheEvictionStrategy();
             _expirationScanFrequency = options.ExpirationScanFrequency;
             _lastExpirationScan = _clock.UtcNow;
+
+            _evictionTimer = new Timer(ExecuteCacheEviction, null, dueTime: 0, period: 1000); //due time and period are set for testing
         }
 
         /// <summary>
@@ -231,7 +237,7 @@ namespace Microsoft.Extensions.Caching.Memory
             StartScanForExpiredItems();
         }
 
-        public void RemoveEntry(CacheEntry entry)
+        private void RemoveEntry(CacheEntry entry)
         {
             if (EntriesCollection.Remove(new KeyValuePair<object, CacheEntry>(entry.Key, entry)))
             {
@@ -246,6 +252,16 @@ namespace Microsoft.Extensions.Caching.Memory
             StartScanForExpiredItems();
         }
 
+        private void ExecuteCacheEviction(object state)
+        {
+            foreach (var entry in _evictionStrategy.GetEntriesToEvict(_entries.Values, _clock.UtcNow))
+            {
+                RemoveEntry(entry);
+            }
+        }
+
+#region Replace with eviction logic?
+
         // Called by multiple actions to see how long it's been since we last checked for expired items.
         // If sufficient time has elapsed then a scan is initiated on a background task.
         private void StartScanForExpiredItems()
@@ -254,8 +270,9 @@ namespace Microsoft.Extensions.Caching.Memory
             if (_expirationScanFrequency < now - _lastExpirationScan)
             {
                 _lastExpirationScan = now;
-                Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
-                    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                // Disabled for testing
+                //Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
+                //    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
         }
 
@@ -270,6 +287,8 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
         }
+
+#endregion
 
         public void Dispose()
         {
