@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
@@ -27,11 +27,10 @@ namespace Microsoft.Extensions.Caching.Memory
 
         private readonly ISystemClock _clock;
         private readonly IMemoryCacheEvictionStrategy _evictionStrategy;
+        private readonly IMemoryCacheEvictionTrigger _evictionTrigger;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
-
-        private Timer _evictionTimer;
 
         /// <summary>
         /// Creates a new <see cref="MemoryCache"/> instance.
@@ -51,10 +50,10 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _evictionStrategy = options.EvictionStrategy ?? new DefaultMemoryCacheEvictionStrategy();
+            _evictionTrigger = options.EvictionTrigger ?? new DefaultMemoryEvictionTrigger();
+            _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
             _expirationScanFrequency = options.ExpirationScanFrequency;
             _lastExpirationScan = _clock.UtcNow;
-
-            _evictionTimer = new Timer(ExecuteCacheEviction, null, dueTime: 0, period: 1000); //due time and period are set for testing
         }
 
         /// <summary>
@@ -252,12 +251,16 @@ namespace Microsoft.Extensions.Caching.Memory
             StartScanForExpiredItems();
         }
 
-        private void ExecuteCacheEviction(object state)
+        private bool ExecuteCacheEviction()
         {
-            foreach (var entry in _evictionStrategy.GetEntriesToEvict(_entries.Values, _clock.UtcNow))
+            Console.WriteLine("Executing eviction logic");
+            var entriesToEvict = _evictionStrategy.GetEntriesToEvict(_entries.Values, _clock.UtcNow);
+            foreach (var entry in entriesToEvict)
             {
+                Console.WriteLine($"Evicting {entry.Key} - {entry.Value}");
                 RemoveEntry(entry);
             }
+            return entriesToEvict.Any();
         }
 
 #region Replace with eviction logic?
@@ -266,14 +269,16 @@ namespace Microsoft.Extensions.Caching.Memory
         // If sufficient time has elapsed then a scan is initiated on a background task.
         private void StartScanForExpiredItems()
         {
-            var now = _clock.UtcNow;
-            if (_expirationScanFrequency < now - _lastExpirationScan)
-            {
-                _lastExpirationScan = now;
-                // Disabled for testing
-                //Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
-                //    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
-            }
+            Console.WriteLine("Starting trigger");
+            _evictionTrigger.Start();
+            //var now = _clock.UtcNow;
+            //if (_expirationScanFrequency < now - _lastExpirationScan)
+            //{
+            //    _lastExpirationScan = now;
+            //    // Disabled for testing
+            //    //Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
+            //    //    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            //}
         }
 
         private static void ScanForExpiredItems(MemoryCache cache)

@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public IMemoryCacheEvictionStrategy EvictionStrategy { get; set; }
 
+        public IMemoryCacheEvictionTrigger EvictionTrigger { get; set; }
+
         MemoryCacheOptions IOptions<MemoryCacheOptions>.Value
         {
             get { return this; }
