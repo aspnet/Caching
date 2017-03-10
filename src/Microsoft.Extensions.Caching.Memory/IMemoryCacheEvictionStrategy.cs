@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public interface IMemoryCacheEvictionStrategy
     {
-        // doc comments, returns a list of entries entry to evict
+        // TODO: doc comments
         IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now);
     }
 }

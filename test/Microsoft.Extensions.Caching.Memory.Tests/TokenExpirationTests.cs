@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return new MemoryCache(new MemoryCacheOptions()
             {
                 Clock = clock,
+                EvictionTrigger = new DefaultMemoryEvictionTrigger(TimeSpan.FromSeconds(1), 10)
             });
         }
 

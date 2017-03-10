@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public interface IMemoryCacheEvictionTrigger : IDisposable
     {
-        // doc comments
+        // TODO: doc comments
         Func<bool> EvictionCallback { get; set; }
 
         void Resume();

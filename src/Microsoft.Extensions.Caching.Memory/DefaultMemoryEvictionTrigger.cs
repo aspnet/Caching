@@ -1,11 +1,14 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Threading;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
+    // TODO: review disposable/locking logic
     public class DefaultMemoryEvictionTrigger : IMemoryCacheEvictionTrigger
     {
-        // Might be overly strict with locking, need analysis
         private readonly object _lock = new object();
         private readonly TimeSpan _evictionInterval;
         private readonly int _intervalsWithoutEvictionUntilIdle;
@@ -16,7 +19,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private Timer _timer;
 
         public DefaultMemoryEvictionTrigger()
-            : this(TimeSpan.FromSeconds(2), 3) // for testing
+            : this(TimeSpan.FromMinutes(1), 10) // TODO: Need better defaults?
         { }
 
         public DefaultMemoryEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)

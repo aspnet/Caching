@@ -3,25 +3,30 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    // Just remove expired entries
     public class DefaultMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
         public virtual IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
         {
-            var entriesToEvict = new List<CacheEntry>();
+            List<CacheEntry> entriesToEvict = null;
 
             foreach (var entry in entries)
             {
                 if (entry.CheckExpired(now))
                 {
+                    if (entriesToEvict == null)
+                    {
+                        entriesToEvict = new List<CacheEntry>();
+                    }
+
                     entriesToEvict.Add(entry);
                 }
             }
 
-            return entriesToEvict;
+            return entriesToEvict ?? Enumerable.Empty<CacheEntry>();
         }
     }
 }

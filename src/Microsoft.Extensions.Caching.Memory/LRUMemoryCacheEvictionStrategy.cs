@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    // LRU
+    // TODO: remove this
     public class LRUMemoryCacheEvictionStrategy : DefaultMemoryCacheEvictionStrategy
     {
         private readonly int MaximumEntries;

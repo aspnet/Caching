@@ -19,9 +19,9 @@ namespace Microsoft.Extensions.Caching.Memory
         private IList<PostEvictionCallbackRegistration> _postEvictionCallbacks;
         private bool _isExpired;
 
-        internal IList<IChangeToken> _expirationTokens;
-        internal DateTimeOffset? _absoluteExpiration;
-        internal TimeSpan? _absoluteExpirationRelativeToNow;
+        private IList<IChangeToken> _expirationTokens;
+        private DateTimeOffset? _absoluteExpiration;
+        private TimeSpan? _absoluteExpirationRelativeToNow;
         private TimeSpan? _slidingExpiration;
         private IDisposable _scope;
 
@@ -151,7 +151,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public object Value { get; set; }
 
-        public DateTimeOffset LastAccessed { get; set; }
+        public DateTimeOffset LastAccessed { get; internal set; }
 
         internal EvictionReason EvictionReason { get; private set; }
 
@@ -171,6 +171,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return _isExpired || CheckForExpiredTime(now) || CheckForExpiredTokens();
         }
 
+        // TODO: expose this so custom strategies can set eviction reason?
         internal void SetExpired(EvictionReason reason)
         {
             if (EvictionReason == EvictionReason.None)
@@ -199,7 +200,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return false;
         }
 
-        internal bool CheckForExpiredTokens()
+        private bool CheckForExpiredTokens()
         {
             if (_expirationTokens != null)
             {
