@@ -19,10 +19,10 @@ namespace Microsoft.Extensions.Caching.Memory
             : this(TimeSpan.FromSeconds(2), 3) // for testing
         { }
 
-        public DefaultMemoryEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdel)
+        public DefaultMemoryEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)
         {
             _evictionInterval = evictionInterval;
-            _intervalsWithoutEvictionUntilIdle = intervalsWithoutEvictionUntilIdel;
+            _intervalsWithoutEvictionUntilIdle = intervalsWithoutEvictionUntilIdle;
             _timer = new Timer(TimerLoop, null, Timeout.Infinite, Timeout.Infinite);
         }
 
