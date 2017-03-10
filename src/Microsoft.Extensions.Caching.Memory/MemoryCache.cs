@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
@@ -173,7 +172,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            StartScanForExpiredItems();
+            _evictionTrigger.Resume();
         }
 
         /// <inheritdoc />
@@ -212,7 +211,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            StartScanForExpiredItems();
+            _evictionTrigger.Resume();
 
             return found;
         }
@@ -233,7 +232,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 entry.InvokeEvictionCallbacks();
             }
 
-            StartScanForExpiredItems();
+            _evictionTrigger.Resume();
         }
 
         private void RemoveEntry(CacheEntry entry)
@@ -248,52 +247,18 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             // TODO: For efficiency consider processing these expirations in batches.
             RemoveEntry(entry);
-            StartScanForExpiredItems();
+            _evictionTrigger.Resume();
         }
 
         private bool ExecuteCacheEviction()
         {
-            Console.WriteLine("Executing eviction logic");
             var entriesToEvict = _evictionStrategy.GetEntriesToEvict(_entries.Values, _clock.UtcNow);
             foreach (var entry in entriesToEvict)
             {
-                Console.WriteLine($"Evicting {entry.Key} - {entry.Value}");
                 RemoveEntry(entry);
             }
             return entriesToEvict.Any();
         }
-
-#region Replace with eviction logic?
-
-        // Called by multiple actions to see how long it's been since we last checked for expired items.
-        // If sufficient time has elapsed then a scan is initiated on a background task.
-        private void StartScanForExpiredItems()
-        {
-            Console.WriteLine("Starting trigger");
-            _evictionTrigger.Start();
-            //var now = _clock.UtcNow;
-            //if (_expirationScanFrequency < now - _lastExpirationScan)
-            //{
-            //    _lastExpirationScan = now;
-            //    // Disabled for testing
-            //    //Task.Factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this,
-            //    //    CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
-            //}
-        }
-
-        private static void ScanForExpiredItems(MemoryCache cache)
-        {
-            var now = cache._clock.UtcNow;
-            foreach (var entry in cache._entries.Values)
-            {
-                if (entry.CheckExpired(now))
-                {
-                    cache.RemoveEntry(entry);
-                }
-            }
-        }
-
-#endregion
 
         public void Dispose()
         {

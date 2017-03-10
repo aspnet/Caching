@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        public void Start()
+        public void Resume()
         {
             if (!_isDisposed && !_timerIsRunning)
             {
