@@ -8,7 +8,7 @@ using System.Linq;
 namespace Microsoft.Extensions.Caching.Memory
 {
     // LRU
-    public class LRUMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
+    public class LRUMemoryCacheEvictionStrategy : DefaultMemoryCacheEvictionStrategy
     {
         private readonly int MaximumEntries;
 
@@ -17,30 +17,29 @@ namespace Microsoft.Extensions.Caching.Memory
             MaximumEntries = maximumEntries;
         }
 
-        public IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
+        public override IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
         {
-            // Remove expired items first
-
+            var expiredEntries = base.GetEntriesToEvict(entries, now);
             var removalTarget = entries.Count() - MaximumEntries;
 
-            if (removalTarget <= 0)
+            if (removalTarget <= expiredEntries.Count())
             {
-                return Enumerable.Empty<CacheEntry>();
+                return expiredEntries;
             }
 
-            var entriesToEvict = new List<CacheEntry>();
+            var addtionalEntriesToEvict = new List<CacheEntry>(expiredEntries);
 
             foreach (var entry in entries.OrderBy(e => e.LastAccessed))
             {
-                if (entriesToEvict.Count > removalTarget)
+                if (addtionalEntriesToEvict.Count > removalTarget)
                 {
                     break;
                 }
                 entry.SetExpired(EvictionReason.Capacity);
-                entriesToEvict.Add(entry);
+                addtionalEntriesToEvict.Add(entry);
             }
 
-            return entriesToEvict;
+            return addtionalEntriesToEvict;
         }
     }
 }

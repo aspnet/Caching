@@ -28,9 +28,6 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly IMemoryCacheEvictionStrategy _evictionStrategy;
         private readonly IMemoryCacheEvictionTrigger _evictionTrigger;
 
-        private TimeSpan _expirationScanFrequency;
-        private DateTimeOffset _lastExpirationScan;
-
         /// <summary>
         /// Creates a new <see cref="MemoryCache"/> instance.
         /// </summary>
@@ -51,8 +48,6 @@ namespace Microsoft.Extensions.Caching.Memory
             _evictionStrategy = options.EvictionStrategy ?? new DefaultMemoryCacheEvictionStrategy();
             _evictionTrigger = options.EvictionTrigger ?? new DefaultMemoryEvictionTrigger();
             _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
-            _expirationScanFrequency = options.ExpirationScanFrequency;
-            _lastExpirationScan = _clock.UtcNow;
         }
 
         /// <summary>

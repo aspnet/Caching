@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.Caching.Memory
     // Just remove expired entries
     public class DefaultMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
-        public IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
+        public virtual IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
         {
             var entriesToEvict = new List<CacheEntry>();
 

@@ -11,9 +11,6 @@ namespace Microsoft.Extensions.Caching.Memory
     {
         public ISystemClock Clock { get; set; }
 
-        // May no longer be needed
-        public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
-
         public IMemoryCacheEvictionStrategy EvictionStrategy { get; set; }
 
         public IMemoryCacheEvictionTrigger EvictionTrigger { get; set; }
