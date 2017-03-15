@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    public class CacheEntry : ICacheEntry
+    public class CacheEntry : ICacheEntry, IRetrievedCacheEntry
     {
         private bool _added = false;
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;
@@ -153,6 +153,8 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public DateTimeOffset LastAccessed { get; internal set; }
 
+        public bool IsExpired => _isExpired;
+
         internal EvictionReason EvictionReason { get; private set; }
 
         public void Dispose()
@@ -171,8 +173,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return _isExpired || CheckForExpiredTime(now) || CheckForExpiredTokens();
         }
 
-        // TODO: expose this so custom strategies can set eviction reason?
-        internal void SetExpired(EvictionReason reason)
+        public void SetExpired(EvictionReason reason)
         {
             if (EvictionReason == EvictionReason.None)
             {

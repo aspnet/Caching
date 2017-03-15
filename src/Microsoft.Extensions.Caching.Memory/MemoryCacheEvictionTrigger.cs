@@ -7,7 +7,7 @@ using System.Threading;
 namespace Microsoft.Extensions.Caching.Memory
 {
     // TODO: review disposable/locking logic
-    public class DefaultMemoryEvictionTrigger : IMemoryCacheEvictionTrigger
+    public class MemoryCacheEvictionTrigger : IMemoryCacheEvictionTrigger
     {
         private readonly object _lock = new object();
         private readonly TimeSpan _evictionInterval;
@@ -18,11 +18,11 @@ namespace Microsoft.Extensions.Caching.Memory
         private int _intervalsWithoutEviction;
         private Timer _timer;
 
-        public DefaultMemoryEvictionTrigger()
+        public MemoryCacheEvictionTrigger()
             : this(TimeSpan.FromMinutes(1), 10) // TODO: Need better defaults?
         { }
 
-        public DefaultMemoryEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)
+        public MemoryCacheEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)
         {
             _evictionInterval = evictionInterval;
             _intervalsWithoutEvictionUntilIdle = intervalsWithoutEvictionUntilIdle;

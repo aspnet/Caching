@@ -8,7 +8,7 @@ using System.Linq;
 namespace Microsoft.Extensions.Caching.Memory
 {
     // TODO: remove this
-    public class LRUMemoryCacheEvictionStrategy : DefaultMemoryCacheEvictionStrategy
+    public class LRUMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
         private readonly int MaximumEntries;
 
@@ -17,29 +17,17 @@ namespace Microsoft.Extensions.Caching.Memory
             MaximumEntries = maximumEntries;
         }
 
-        public override IEnumerable<CacheEntry> GetEntriesToEvict(IEnumerable<CacheEntry> entries, DateTimeOffset now)
+        public void Evict(IList<IRetrievedCacheEntry> entries, DateTimeOffset now)
         {
-            var expiredEntries = base.GetEntriesToEvict(entries, now);
-            var removalTarget = entries.Count() - MaximumEntries;
+            var removalTarget = entries.Count - MaximumEntries;
 
-            if (removalTarget <= expiredEntries.Count())
+            if (removalTarget > 0)
             {
-                return expiredEntries;
-            }
-
-            var addtionalEntriesToEvict = new List<CacheEntry>(expiredEntries);
-
-            foreach (var entry in entries.OrderBy(e => e.LastAccessed))
-            {
-                if (addtionalEntriesToEvict.Count > removalTarget)
+                foreach (var entry in entries.OrderBy(e => e.LastAccessed).Take(removalTarget))
                 {
-                    break;
+                    entry.SetExpired(EvictionReason.Capacity);
                 }
-                entry.SetExpired(EvictionReason.Capacity);
-                addtionalEntriesToEvict.Add(entry);
             }
-
-            return addtionalEntriesToEvict;
         }
     }
 }

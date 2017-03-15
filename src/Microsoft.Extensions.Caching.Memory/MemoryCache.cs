@@ -45,8 +45,8 @@ namespace Microsoft.Extensions.Caching.Memory
             _entryExpirationNotification = EntryExpired;
 
             _clock = options.Clock ?? new SystemClock();
-            _evictionStrategy = options.EvictionStrategy ?? new DefaultMemoryCacheEvictionStrategy();
-            _evictionTrigger = options.EvictionTrigger ?? new DefaultMemoryEvictionTrigger();
+            _evictionStrategy = options.EvictionStrategy ?? new MemoryCacheEvictionStrategy();
+            _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger();
             _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
         }
 
@@ -247,12 +247,34 @@ namespace Microsoft.Extensions.Caching.Memory
 
         private bool ExecuteCacheEviction()
         {
-            var entriesToEvict = _evictionStrategy.GetEntriesToEvict(_entries.Values, _clock.UtcNow);
-            foreach (var entry in entriesToEvict)
+            var evictedEntries = false;
+            var utcNow = _clock.UtcNow;
+            var freshEntries = new List<CacheEntry>();
+
+            // TODO: evaluate the perf overhead of enumerators vs taking a snapshot
+            foreach (var entry in _entries)
             {
-                RemoveEntry(entry);
+                if (!entry.Value.CheckExpired(utcNow))
+                {
+                    freshEntries.Add(entry.Value);
+                }
             }
-            return entriesToEvict.Any();
+
+            _evictionStrategy.Evict(freshEntries, utcNow); // TODO: anything else eviction strategies need?
+
+            foreach (var entry in _entries)
+            {
+                if (entry.Value.IsExpired)
+                {
+                    if (evictedEntries == false)
+                    {
+                        evictedEntries = true;
+                    }
+                    RemoveEntry(entry.Value);
+                }
+            }
+
+            return evictedEntries;
         }
 
         public void Dispose()
