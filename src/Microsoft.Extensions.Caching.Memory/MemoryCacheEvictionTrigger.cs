@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private volatile bool _isDisposed;
         private volatile bool _timerIsRunning;
         private int _intervalsWithoutEviction;
+        private int _evictionRunning;
         private Timer _timer;
 
         public MemoryCacheEvictionTrigger()
@@ -79,18 +80,23 @@ namespace Microsoft.Extensions.Caching.Memory
 
         private void TimerLoop(object state)
         {
-            if (EvictionCallback())
+            if (Interlocked.CompareExchange(ref _evictionRunning, 1, 0) == 0)
             {
-                Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
-            }
-            else
-            {
-                Interlocked.Increment(ref _intervalsWithoutEviction);
-            }
+                if (EvictionCallback())
+                {
+                    Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
+                }
+                else
+                {
+                    Interlocked.Increment(ref _intervalsWithoutEviction);
+                }
 
-            if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle)
-            {
-                Stop();
+                if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle)
+                {
+                    Stop();
+                }
+
+                Interlocked.Exchange(ref _evictionRunning, 0);
             }
         }
     }
