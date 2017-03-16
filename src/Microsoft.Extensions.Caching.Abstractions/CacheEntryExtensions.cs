@@ -136,6 +136,7 @@ namespace Microsoft.Extensions.Caching.Memory
             entry.AbsoluteExpiration = options.AbsoluteExpiration;
             entry.AbsoluteExpirationRelativeToNow = options.AbsoluteExpirationRelativeToNow;
             entry.SlidingExpiration = options.SlidingExpiration;
+            entry.EvictionMetadata = options.EvictionMetadata;
 
             foreach (var expirationToken in options.ExpirationTokens)
             {

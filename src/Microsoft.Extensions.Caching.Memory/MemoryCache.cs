@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -249,7 +250,7 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var evictedEntries = false;
             var utcNow = _clock.UtcNow;
-            var freshEntries = new List<CacheEntry>();
+            var freshEntries = new List<IRetrievedCacheEntry>();
 
             // TODO: evaluate the perf overhead of enumerators vs taking a snapshot
             foreach (var entry in _entries)

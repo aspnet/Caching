@@ -74,6 +74,8 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
+        public object EvictionMetadata { get; set; }
+
         /// <summary>
         /// Gets the <see cref="IChangeToken"/> instances which cause the cache entry to expire.
         /// </summary>

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    public class CacheEntry : ICacheEntry, IRetrievedCacheEntry
+    internal class CacheEntry : ICacheEntry, IRetrievedCacheEntry
     {
         private bool _added = false;
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;
@@ -156,6 +156,8 @@ namespace Microsoft.Extensions.Caching.Memory
         public bool IsExpired => _isExpired;
 
         internal EvictionReason EvictionReason { get; private set; }
+
+        public object EvictionMetadata { get; set; }
 
         public void Dispose()
         {

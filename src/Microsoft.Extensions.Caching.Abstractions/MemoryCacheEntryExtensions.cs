@@ -66,6 +66,14 @@ namespace Microsoft.Extensions.Caching.Memory
             return options;
         }
 
+        public static MemoryCacheEntryOptions SetEvictionMetadata(
+            this MemoryCacheEntryOptions options,
+            object metadata)
+        {
+            options.EvictionMetadata = metadata;
+            return options;
+        }
+
         /// <summary>
         /// The given callback will be fired after the cache entry is evicted from the cache.
         /// </summary>

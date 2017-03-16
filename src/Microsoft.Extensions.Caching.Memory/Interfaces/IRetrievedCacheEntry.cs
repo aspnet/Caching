@@ -31,6 +31,8 @@ namespace Microsoft.Extensions.Caching.Memory
         /// </summary>
         TimeSpan? SlidingExpiration { get; }
 
+        object EvictionMetadata { get; }
+
         DateTimeOffset LastAccessed { get; }
 
         bool IsExpired { get; }
