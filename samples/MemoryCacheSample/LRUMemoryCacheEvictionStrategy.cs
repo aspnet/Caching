@@ -17,15 +17,15 @@ namespace Microsoft.Extensions.Caching.Memory
             MaximumEntries = maximumEntries;
         }
 
-        public void Evict(IList<IRetrievedCacheEntry> entries, DateTimeOffset now)
+        public void Evict(MemoryCache cache, DateTimeOffset utcNow)
         {
-            var removalTarget = entries.Count - MaximumEntries;
+            var removalTarget = cache.Count - MaximumEntries;
 
             if (removalTarget > 0)
             {
-                foreach (var entry in entries.OrderBy(e => e.LastAccessed).Take(removalTarget))
+                foreach (var entry in cache.OrderBy(e => e.Value.LastAccessed).Take(removalTarget))
                 {
-                    entry.SetExpired(EvictionReason.Capacity);
+                    entry.Value.SetExpired(EvictionReason.Capacity);
                 }
             }
         }

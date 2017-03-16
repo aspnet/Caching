@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
@@ -15,9 +14,9 @@ namespace Microsoft.Extensions.Caching.Memory
     /// An implementation of <see cref="IMemoryCache"/> using a dictionary to
     /// store its entries.
     /// </summary>
-    public class MemoryCache : IMemoryCache
+    public class MemoryCache : IMemoryCache, IEnumerable<KeyValuePair<object, IRetrievedCacheEntry>>
     {
-        private readonly ConcurrentDictionary<object, CacheEntry> _entries;
+        private readonly ConcurrentDictionary<object, IRetrievedCacheEntry> _entries;
         private bool _disposed;
 
         // We store the delegates locally to prevent allocations
@@ -41,7 +40,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
 
             var options = optionsAccessor.Value;
-            _entries = new ConcurrentDictionary<object, CacheEntry>();
+            _entries = new ConcurrentDictionary<object, IRetrievedCacheEntry>();
             _setEntry = SetEntry;
             _entryExpirationNotification = EntryExpired;
 
@@ -67,7 +66,7 @@ namespace Microsoft.Extensions.Caching.Memory
             get { return _entries.Count; }
         }
 
-        private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection => _entries;
+        private ICollection<KeyValuePair<object, IRetrievedCacheEntry>> EntriesCollection => _entries;
 
         /// <inheritdoc />
         public ICacheEntry CreateEntry(object key)
@@ -115,7 +114,7 @@ namespace Microsoft.Extensions.Caching.Memory
             // Initialize the last access timestamp at the time the entry is added
             entry.LastAccessed = utcNow;
 
-            CacheEntry priorEntry;
+            IRetrievedCacheEntry priorEntry;
             if (_entries.TryGetValue(entry.Key, out priorEntry))
             {
                 priorEntry.SetExpired(EvictionReason.Replaced);
@@ -156,7 +155,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
                 if (priorEntry != null)
                 {
-                    priorEntry.InvokeEvictionCallbacks();
+                    ((CacheEntry)priorEntry).InvokeEvictionCallbacks();
                 }
             }
             else
@@ -168,7 +167,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume();
+            _evictionTrigger.Resume(this);
         }
 
         /// <inheritdoc />
@@ -185,9 +184,11 @@ namespace Microsoft.Extensions.Caching.Memory
             var utcNow = _clock.UtcNow;
             var found = false;
 
-            CacheEntry entry;
-            if (_entries.TryGetValue(key, out entry))
+            IRetrievedCacheEntry retrievedEntry;
+            if (_entries.TryGetValue(key, out retrievedEntry))
             {
+                var entry = (CacheEntry)retrievedEntry;
+
                 // Check if expired due to expiration tokens, timers, etc. and if so, remove it.
                 // Allow a stale Replaced value to be returned due to concurrent calls to SetExpired during SetEntry.
                 if (entry.CheckExpired(utcNow) && entry.EvictionReason != EvictionReason.Replaced)
@@ -207,7 +208,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume();
+            _evictionTrigger.Resume(this);
 
             return found;
         }
@@ -221,21 +222,21 @@ namespace Microsoft.Extensions.Caching.Memory
             }
 
             CheckDisposed();
-            CacheEntry entry;
+            IRetrievedCacheEntry entry;
             if (_entries.TryRemove(key, out entry))
             {
                 entry.SetExpired(EvictionReason.Removed);
-                entry.InvokeEvictionCallbacks();
+                ((CacheEntry)entry).InvokeEvictionCallbacks();
             }
 
-            _evictionTrigger.Resume();
+            _evictionTrigger.Resume(this);
         }
 
-        private void RemoveEntry(CacheEntry entry)
+        private void RemoveEntry(IRetrievedCacheEntry entry)
         {
-            if (EntriesCollection.Remove(new KeyValuePair<object, CacheEntry>(entry.Key, entry)))
+            if (EntriesCollection.Remove(new KeyValuePair<object, IRetrievedCacheEntry>(entry.Key, entry)))
             {
-                entry.InvokeEvictionCallbacks();
+                ((CacheEntry)entry).InvokeEvictionCallbacks();
             }
         }
 
@@ -243,25 +244,16 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             // TODO: For efficiency consider processing these expirations in batches.
             RemoveEntry(entry);
-            _evictionTrigger.Resume();
+            _evictionTrigger.Resume(this);
         }
 
         private bool ExecuteCacheEviction()
         {
             var evictedEntries = false;
             var utcNow = _clock.UtcNow;
-            var freshEntries = new List<IRetrievedCacheEntry>();
 
             // TODO: evaluate the perf overhead of enumerators vs taking a snapshot
-            foreach (var entry in _entries)
-            {
-                if (!entry.Value.CheckExpired(utcNow))
-                {
-                    freshEntries.Add(entry.Value);
-                }
-            }
-
-            _evictionStrategy.Evict(freshEntries, utcNow); // TODO: anything else eviction strategies need?
+            _evictionStrategy.Evict(this, utcNow); // TODO: anything else eviction strategies need?
 
             foreach (var entry in _entries)
             {
@@ -302,6 +294,16 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ObjectDisposedException(typeof(MemoryCache).FullName);
             }
+        }
+
+        public IEnumerator<KeyValuePair<object, IRetrievedCacheEntry>> GetEnumerator()
+        {
+            return _entries.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

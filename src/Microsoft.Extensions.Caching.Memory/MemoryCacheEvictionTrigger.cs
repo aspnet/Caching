@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        public void Resume()
+        public void Resume(MemoryCache cache)
         {
             if (!_isDisposed && !_timerIsRunning)
             {

@@ -10,8 +10,6 @@ namespace Microsoft.Extensions.Caching.Memory
         // TODO: doc comments
         Func<bool> EvictionCallback { get; set; }
 
-        void Resume();
-
-        void Stop();
+        void Resume(MemoryCache cache);
     }
 }
