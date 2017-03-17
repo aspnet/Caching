@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _evictionStrategy = options.EvictionStrategy ?? new MemoryCacheEvictionStrategy();
-            _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger();
+            _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger(_clock);
             _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
         }
 
@@ -167,7 +167,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(this, _clock.UtcNow);
         }
 
         /// <inheritdoc />
@@ -208,7 +208,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(this, _clock.UtcNow);
 
             return found;
         }
@@ -229,7 +229,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 ((CacheEntry)entry).InvokeEvictionCallbacks();
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(this, _clock.UtcNow);
         }
 
         private void RemoveEntry(IRetrievedCacheEntry entry)
@@ -244,17 +244,15 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             // TODO: For efficiency consider processing these expirations in batches.
             RemoveEntry(entry);
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(this, _clock.UtcNow);
         }
 
         private bool ExecuteCacheEviction()
         {
-            var evictedEntries = false;
-            var utcNow = _clock.UtcNow;
-
             // TODO: evaluate the perf overhead of enumerators vs taking a snapshot
-            _evictionStrategy.Evict(this, utcNow); // TODO: anything else eviction strategies need?
+            _evictionStrategy.Evict(this, _clock.UtcNow); // TODO: anything else eviction strategies need?
 
+            var evictedEntries = false;
             foreach (var entry in _entries)
             {
                 if (entry.Value.IsExpired)
@@ -285,6 +283,8 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
 
                 _disposed = true;
+
+                _evictionTrigger.Dispose();
             }
         }
 
