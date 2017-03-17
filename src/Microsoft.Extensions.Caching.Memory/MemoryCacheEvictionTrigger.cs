@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Extensions.Internal;
 
@@ -54,7 +55,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        public void Resume(MemoryCache cache)
+        public void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
         {
             _lastEvictionCall = _clock.UtcNow;
             Interlocked.Exchange(ref _intervalsWithoutEviction, 0);

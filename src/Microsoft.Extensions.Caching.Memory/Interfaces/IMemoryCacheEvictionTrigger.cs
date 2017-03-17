@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
@@ -10,6 +11,6 @@ namespace Microsoft.Extensions.Caching.Memory
         // TODO: doc comments
         Func<bool> EvictionCallback { get; set; }
 
-        void Resume(MemoryCache cache);
+        void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries);
     }
 }

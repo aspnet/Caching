@@ -121,6 +121,14 @@ namespace Microsoft.Extensions.Caching.Memory
             return entry;
         }
 
+        public static ICacheEntry SetEvictionMetadata(
+            this ICacheEntry entry,
+            object metadata)
+        {
+            entry.EvictionMetadata = metadata;
+            return entry;
+        }
+
         /// <summary>
         /// Applies the values of an existing <see cref="MemoryCacheEntryOptions"/> to the entry.
         /// </summary>

@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.Caching.Memory
     /// An implementation of <see cref="IMemoryCache"/> using a dictionary to
     /// store its entries.
     /// </summary>
-    public class MemoryCache : IMemoryCache, IEnumerable<KeyValuePair<object, IRetrievedCacheEntry>>
+    public class MemoryCache : IMemoryCache, IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>>
     {
         private readonly ConcurrentDictionary<object, IRetrievedCacheEntry> _entries;
         private bool _disposed;
@@ -167,7 +167,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this, _clock.UtcNow);
+            _evictionTrigger.Resume(this);
         }
 
         /// <inheritdoc />
@@ -208,7 +208,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this, _clock.UtcNow);
+            _evictionTrigger.Resume(this);
 
             return found;
         }
@@ -229,7 +229,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 ((CacheEntry)entry).InvokeEvictionCallbacks();
             }
 
-            _evictionTrigger.Resume(this, _clock.UtcNow);
+            _evictionTrigger.Resume(this);
         }
 
         private void RemoveEntry(IRetrievedCacheEntry entry)
@@ -244,7 +244,7 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             // TODO: For efficiency consider processing these expirations in batches.
             RemoveEntry(entry);
-            _evictionTrigger.Resume(this, _clock.UtcNow);
+            _evictionTrigger.Resume(this);
         }
 
         private bool ExecuteCacheEviction()
