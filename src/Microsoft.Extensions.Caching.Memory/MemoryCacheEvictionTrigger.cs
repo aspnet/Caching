@@ -14,22 +14,19 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly object _lock = new object();
         private readonly TimeSpan _evictionInterval;
         private readonly int _intervalsWithoutEvictionUntilIdle;
-        private readonly ISystemClock _clock;
 
         private volatile bool _isDisposed;
         private volatile bool _timerIsRunning;
-        private DateTimeOffset _lastEvictionCall;
         private int _intervalsWithoutEviction;
         private int _evictionRunning;
         private Timer _timer;
 
-        public MemoryCacheEvictionTrigger(ISystemClock clock)
-            : this(clock, TimeSpan.FromMinutes(1), 2) // TODO: Need better defaults?
+        public MemoryCacheEvictionTrigger()
+            : this(TimeSpan.FromMinutes(1), 2)
         { }
 
-        public MemoryCacheEvictionTrigger(ISystemClock clock, TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)
+        public MemoryCacheEvictionTrigger(TimeSpan evictionInterval, int intervalsWithoutEvictionUntilIdle)
         {
-            _clock = clock;
             _evictionInterval = evictionInterval;
             _intervalsWithoutEvictionUntilIdle = intervalsWithoutEvictionUntilIdle;
             _timer = new Timer(TimerLoop, null, Timeout.Infinite, Timeout.Infinite);
@@ -57,7 +54,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
         {
-            _lastEvictionCall = _clock.UtcNow;
             Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
 
             if (!_isDisposed)
@@ -86,8 +82,7 @@ namespace Microsoft.Extensions.Caching.Memory
                     Interlocked.Increment(ref _intervalsWithoutEviction);
                 }
 
-                if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle
-                    && _clock.UtcNow - _lastEvictionCall > _evictionInterval)
+                if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle)
                 {
                     lock (_lock)
                     {

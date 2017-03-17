@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _evictionStrategy = options.EvictionStrategy ?? new MemoryCacheEvictionStrategy();
-            _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger(_clock);
+            _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger();
             _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
         }
 
