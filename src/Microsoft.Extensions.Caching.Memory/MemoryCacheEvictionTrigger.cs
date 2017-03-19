@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Microsoft.Extensions.Internal;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
@@ -20,6 +19,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private int _intervalsWithoutEviction;
         private int _evictionRunning;
         private Timer _timer;
+        private Func<int> _evictionCallback;
 
         public MemoryCacheEvictionTrigger()
             : this(TimeSpan.FromMinutes(1), 2)
@@ -31,8 +31,6 @@ namespace Microsoft.Extensions.Caching.Memory
             _intervalsWithoutEvictionUntilIdle = intervalsWithoutEvictionUntilIdle;
             _timer = new Timer(TimerLoop, null, Timeout.Infinite, Timeout.Infinite);
         }
-
-        public Func<bool> EvictionCallback { get; set; }
 
         public void Dispose()
         {
@@ -50,6 +48,11 @@ namespace Microsoft.Extensions.Caching.Memory
                     }
                 }
             }
+        }
+
+        public void SetEvictionCallback(Func<int> evictionCallback)
+        {
+            _evictionCallback = evictionCallback;
         }
 
         public void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
@@ -73,28 +76,34 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             if (Interlocked.CompareExchange(ref _evictionRunning, 1, 0) == 0)
             {
-                if (EvictionCallback())
+                try
                 {
-                    Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
-                }
-                else
-                {
-                    Interlocked.Increment(ref _intervalsWithoutEviction);
-                }
 
-                if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle)
-                {
-                    lock (_lock)
+                    if (_evictionCallback() > 0)
                     {
-                        _timerIsRunning = false;
+                        Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
+                    }
+                    else
+                    {
+                        Interlocked.Increment(ref _intervalsWithoutEviction);
+                    }
+
+                    if (Volatile.Read(ref _intervalsWithoutEviction) >= _intervalsWithoutEvictionUntilIdle)
+                    {
+                        lock (_lock)
+                        {
+                            _timerIsRunning = false;
+                        }
+                    }
+                    else
+                    {
+                        _timer.Change(_evictionInterval, TimeSpan.FromMilliseconds(-1));
                     }
                 }
-                else
+                finally
                 {
-                    _timer.Change(_evictionInterval, TimeSpan.FromMilliseconds(-1));
+                    Interlocked.Exchange(ref _evictionRunning, 0);
                 }
-
-                Interlocked.Exchange(ref _evictionRunning, 0);
             }
         }
     }

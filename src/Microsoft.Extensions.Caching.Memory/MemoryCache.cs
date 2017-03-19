@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.Caching.Memory
             _clock = options.Clock ?? new SystemClock();
             _evictionStrategy = options.EvictionStrategy ?? new MemoryCacheEvictionStrategy();
             _evictionTrigger = options.EvictionTrigger ?? new MemoryCacheEvictionTrigger();
-            _evictionTrigger.EvictionCallback = ExecuteCacheEviction;
+            _evictionTrigger.SetEvictionCallback(ExecuteCacheEviction);
         }
 
         /// <summary>
@@ -247,25 +247,19 @@ namespace Microsoft.Extensions.Caching.Memory
             _evictionTrigger.Resume(this);
         }
 
-        private bool ExecuteCacheEviction()
+        private int ExecuteCacheEviction()
         {
-            // TODO: evaluate the perf overhead of enumerators vs taking a snapshot
-            _evictionStrategy.Evict(this, _clock.UtcNow); // TODO: anything else eviction strategies need?
-
-            var evictedEntries = false;
+            var evictCount = _evictionStrategy.Evict(this, _clock.UtcNow); // TODO: anything else eviction strategies need?
+            
             foreach (var entry in _entries)
             {
                 if (entry.Value.IsExpired)
                 {
-                    if (evictedEntries == false)
-                    {
-                        evictedEntries = true;
-                    }
                     RemoveEntry(entry.Value);
                 }
             }
 
-            return evictedEntries;
+            return evictCount;
         }
 
         public void Dispose()

@@ -8,12 +8,19 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public class MemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
-        public void Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
+        public int Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
         {
+            var expiredEntries = 0;
+
             foreach (var entry in entries)
             {
-                entry.Value.CheckExpired(utcNow);
+                if (entry.Value.CheckExpired(utcNow))
+                {
+                    expiredEntries++;
+                }
             }
+
+            return expiredEntries;
         }
     }
 }

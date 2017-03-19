@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.Caching.Memory
     public interface IMemoryCacheEvictionTrigger : IDisposable
     {
         // TODO: doc comments
-        Func<bool> EvictionCallback { get; set; }
+        void SetEvictionCallback(Func<int> evictionCallback);
 
         void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries);
     }

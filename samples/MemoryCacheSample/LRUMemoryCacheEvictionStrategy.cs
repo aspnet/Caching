@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.Caching.Memory
             MaximumEntries = maximumEntries;
         }
 
-        public void Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
+        public int Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
         {
             var removalTarget = entries.Count - MaximumEntries;
 
@@ -28,6 +28,8 @@ namespace Microsoft.Extensions.Caching.Memory
                     entry.Value.SetExpired(EvictionReason.Capacity);
                 }
             }
+
+            return removalTarget;
         }
     }
 }
