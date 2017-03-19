@@ -4,32 +4,47 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
-namespace Microsoft.Extensions.Caching.Memory
+namespace MemoryCacheSample
 {
     // TODO: remove this
     public class LRUMemoryCacheEvictionStrategy : IMemoryCacheEvictionStrategy
     {
-        private readonly int MaximumEntries;
+        private readonly IMemoryCacheEvictionStrategy _evictExpiredStrategy;
+        private readonly int _entryLimit;
 
-        public LRUMemoryCacheEvictionStrategy(int maximumEntries)
+        public LRUMemoryCacheEvictionStrategy(int entryLimit)
         {
-            MaximumEntries = maximumEntries;
+            _entryLimit = entryLimit;
+            _evictExpiredStrategy = new MemoryCacheEvictionStrategy();
         }
 
         public int Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
         {
-            var removalTarget = entries.Count - MaximumEntries;
+            var expiredCount = _evictExpiredStrategy.Evict(entries, utcNow);
+            var removalTarget = entries.Count - expiredCount - _entryLimit; // assume underflow is handled
 
-            if (removalTarget > 0)
+            if (removalTarget <= 0)
             {
-                foreach (var entry in entries.OrderBy(e => e.Value.LastAccessed).Take(removalTarget))
+                return expiredCount;
+            }
+
+            var removedEntries = 0;
+            foreach (var entry in entries.OrderBy(e => e.Value.LastAccessed))
+            {
+                if (!entry.Value.IsExpired)
                 {
                     entry.Value.SetExpired(EvictionReason.Capacity);
+                    removedEntries++;
+                }
+                if (removedEntries == removalTarget)
+                {
+                    break;
                 }
             }
 
-            return removalTarget;
+            return removalTarget + expiredCount;
         }
     }
 }
