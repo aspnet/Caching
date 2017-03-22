@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>cache;distributedcache;sqlserver</PackageTags>
 
-    <!-- TODO File bug to fix ApiCheck so it can handle this project before this goes in. -->
+    <!-- Temporary workaround for API Check crash that is part of aspnet/BuildTools#201. -->
     <EnableApiCheck>false</EnableApiCheck>
   </PropertyGroup>
 
