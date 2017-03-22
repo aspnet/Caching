@@ -74,6 +74,8 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
+        public object EvictionMetadata { get; set; }
+
         /// <summary>
         /// Gets the <see cref="IChangeToken"/> instances which cause the cache entry to expire.
         /// </summary>
@@ -84,11 +86,5 @@ namespace Microsoft.Extensions.Caching.Memory
         /// </summary>
         public IList<PostEvictionCallbackRegistration> PostEvictionCallbacks { get; }
             = new List<PostEvictionCallbackRegistration>();
-
-        /// <summary>
-        /// Gets or sets the priority for keeping the cache entry in the cache during a
-        /// memory pressure triggered cleanup. The default is <see cref="CacheItemPriority.Normal"/>.
-        /// </summary>
-        public CacheItemPriority Priority { get; set; } = CacheItemPriority.Normal;
     }
 }

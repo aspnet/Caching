@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return new MemoryCache(new MemoryCacheOptions()
             {
                 Clock = clock,
-                CompactOnMemoryPressure = false,
+                EvictionTrigger = new MemoryCacheEvictionTrigger(TimeSpan.FromSeconds(1), 10)
             });
         }
 

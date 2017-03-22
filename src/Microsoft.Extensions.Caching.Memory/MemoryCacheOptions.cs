@@ -11,9 +11,9 @@ namespace Microsoft.Extensions.Caching.Memory
     {
         public ISystemClock Clock { get; set; }
 
-        public bool CompactOnMemoryPressure { get; set; } = true;
+        public IMemoryCacheEvictionStrategy EvictionStrategy { get; set; }
 
-        public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
+        public IMemoryCacheEvictionTrigger EvictionTrigger { get; set; }
 
         MemoryCacheOptions IOptions<MemoryCacheOptions>.Value
         {

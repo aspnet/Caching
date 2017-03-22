@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Memory
         /// Gets or sets an absolute expiration date for the cache entry.
         /// </summary>
         DateTimeOffset? AbsoluteExpiration { get; set; }
-        
+
         /// <summary>
         /// Gets or sets an absolute expiration time, relative to now.
         /// </summary>
@@ -38,6 +38,8 @@ namespace Microsoft.Extensions.Caching.Memory
         /// </summary>
         TimeSpan? SlidingExpiration { get; set; }
 
+        object EvictionMetadata { get; set; }
+
         /// <summary>
         /// Gets the <see cref="IChangeToken"/> instances which cause the cache entry to expire.
         /// </summary>
@@ -47,12 +49,5 @@ namespace Microsoft.Extensions.Caching.Memory
         /// Gets or sets the callbacks will be fired after the cache entry is evicted from the cache.
         /// </summary>
         IList<PostEvictionCallbackRegistration> PostEvictionCallbacks { get; }
-
-        /// <summary>
-        /// Gets or sets the priority for keeping the cache entry in the cache during a
-        /// memory pressure triggered cleanup. The default is <see cref="CacheItemPriority.Normal"/>.
-        /// </summary>
-        CacheItemPriority Priority { get; set; }
-
     }
 }

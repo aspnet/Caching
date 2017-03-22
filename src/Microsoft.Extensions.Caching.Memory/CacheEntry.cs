@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    internal class CacheEntry : ICacheEntry
+    internal class CacheEntry : ICacheEntry, IRetrievedCacheEntry
     {
         private bool _added = false;
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;
@@ -19,9 +19,9 @@ namespace Microsoft.Extensions.Caching.Memory
         private IList<PostEvictionCallbackRegistration> _postEvictionCallbacks;
         private bool _isExpired;
 
-        internal IList<IChangeToken> _expirationTokens;
-        internal DateTimeOffset? _absoluteExpiration;
-        internal TimeSpan? _absoluteExpirationRelativeToNow;
+        private IList<IChangeToken> _expirationTokens;
+        private DateTimeOffset? _absoluteExpiration;
+        private TimeSpan? _absoluteExpirationRelativeToNow;
         private TimeSpan? _slidingExpiration;
         private IDisposable _scope;
 
@@ -147,19 +147,17 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        /// <summary>
-        /// Gets or sets the priority for keeping the cache entry in the cache during a
-        /// memory pressure triggered cleanup. The default is <see cref="CacheItemPriority.Normal"/>.
-        /// </summary>
-        public CacheItemPriority Priority { get; set; } = CacheItemPriority.Normal;
-
         public object Key { get; private set; }
 
         public object Value { get; set; }
 
-        internal DateTimeOffset LastAccessed { get; set; }
+        public DateTimeOffset LastAccessed { get; internal set; }
+
+        public bool IsExpired => _isExpired;
 
         internal EvictionReason EvictionReason { get; private set; }
+
+        public object EvictionMetadata { get; set; }
 
         public void Dispose()
         {
@@ -172,12 +170,12 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        internal bool CheckExpired(DateTimeOffset now)
+        public bool CheckExpired(DateTimeOffset now)
         {
             return _isExpired || CheckForExpiredTime(now) || CheckForExpiredTokens();
         }
 
-        internal void SetExpired(EvictionReason reason)
+        public void SetExpired(EvictionReason reason)
         {
             if (EvictionReason == EvictionReason.None)
             {
@@ -205,7 +203,7 @@ namespace Microsoft.Extensions.Caching.Memory
             return false;
         }
 
-        internal bool CheckForExpiredTokens()
+        private bool CheckForExpiredTokens()
         {
             if (_expirationTokens != null)
             {
