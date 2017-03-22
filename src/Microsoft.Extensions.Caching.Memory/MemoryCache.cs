@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using static Microsoft.Extensions.Caching.Memory.MemoryCacheOptions;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
@@ -27,9 +28,10 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
-
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
+
+        private Action<MemoryCache> _customCompactDelegate;
 
         /// <summary>
         /// Creates a new <see cref="MemoryCache"/> instance.
@@ -50,6 +52,7 @@ namespace Microsoft.Extensions.Caching.Memory
             _clock = options.Clock ?? new SystemClock();
             if (options.CompactOnMemoryPressure)
             {
+                _customCompactDelegate = options.CustomCompactOnMemoryPressureDelegate;
                 GcNotification.Register(DoMemoryPreassureCollection, state: null);
             }
             _expirationScanFrequency = options.ExpirationScanFrequency;
@@ -277,15 +280,26 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         /// This is called after a Gen2 garbage collection. We assume this means there was memory pressure.
-        /// Remove at least 10% of the total entries (or estimated memory?).
+        /// Remove at least 10% of the total entries (or estimated memory?) or
+        /// Call custom compact delegate.
         private bool DoMemoryPreassureCollection(object state)
         {
             if (_disposed)
             {
                 return false;
             }
-
-            Compact(0.10);
+            if (_customCompactDelegate == null)
+            {
+                Compact(0.10);
+            }
+            else
+            {
+                try
+                {
+                    _customCompactDelegate?.Invoke(this);
+                }
+                catch { /*Ignore */}
+            }
 
             return true;
         }
@@ -298,6 +312,12 @@ namespace Microsoft.Extensions.Caching.Memory
         /// ?. Items with the soonest sliding expiration.
         /// ?. Larger objects - estimated by object graph size, inaccurate.
         public void Compact(double percentage)
+        {
+            int removalCountTarget = (int)(_entries.Count * percentage);
+            CompactByRemovalCountTarget(removalCountTarget);
+        }
+
+        public void CompactByRemovalCountTarget(int removalCountTarget)
         {
             var entriesToRemove = new List<CacheEntry>();
             var lowPriEntries = new List<CacheEntry>();
@@ -333,7 +353,6 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            int removalCountTarget = (int)(_entries.Count * percentage);
 
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, lowPriEntries);
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
