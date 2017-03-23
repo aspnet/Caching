@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.Caching.Memory
     /// An implementation of <see cref="IMemoryCache"/> using a dictionary to
     /// store its entries.
     /// </summary>
-    public partial class MemoryCache : IMemoryCache
+    public class MemoryCache : IMemoryCache
     {
         private readonly ConcurrentDictionary<object, IReadOnlyCacheEntry> _entries;
         private bool _disposed;
