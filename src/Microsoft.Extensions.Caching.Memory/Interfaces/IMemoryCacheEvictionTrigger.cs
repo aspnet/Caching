@@ -11,6 +11,6 @@ namespace Microsoft.Extensions.Caching.Memory
         // TODO: doc comments
         void SetEvictionCallback(Func<int> evictionCallback);
 
-        void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries);
+        void Resume(IReadOnlyCollection<IReadOnlyCacheEntry> entries);
     }
 }

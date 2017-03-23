@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.Caching.Memory
             _evictionCallback = evictionCallback;
         }
 
-        public void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
+        public void Resume(IReadOnlyCollection<IReadOnlyCacheEntry> entries)
         {
             Interlocked.Exchange(ref _intervalsWithoutEviction, 0);
 

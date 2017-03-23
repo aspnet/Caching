@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    internal class CacheEntry : ICacheEntry, IRetrievedCacheEntry
+    internal class CacheEntry : ICacheEntry, IReadOnlyCacheEntry
     {
         private bool _added = false;
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;

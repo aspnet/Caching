@@ -23,12 +23,12 @@ namespace MemoryCacheSample
 
         public void Dispose() { }
 
-        public void Resume(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
+        public void Resume(IReadOnlyCollection<IReadOnlyCacheEntry> entries)
         {
             if (entries.Count > _entryLimit)
             {
                 Task.Factory.StartNew(
-                    state => StartEviction((IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>>)state),
+                    state => StartEviction((IReadOnlyCollection<IReadOnlyCacheEntry>)state),
                     entries,
                     CancellationToken.None,
                     TaskCreationOptions.DenyChildAttach,
@@ -41,7 +41,7 @@ namespace MemoryCacheSample
             _evictionCallback = evictionCallback;
         }
 
-        private void StartEviction(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries)
+        private void StartEviction(IReadOnlyCollection<IReadOnlyCacheEntry> entries)
         {
             // Don't run too often
             if (Monitor.TryEnter(_evictionlock))

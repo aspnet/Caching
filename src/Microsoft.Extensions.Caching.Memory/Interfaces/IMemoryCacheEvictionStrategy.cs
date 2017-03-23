@@ -9,6 +9,6 @@ namespace Microsoft.Extensions.Caching.Memory
     public interface IMemoryCacheEvictionStrategy
     {
         // TODO: doc comments
-        int Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow);
+        int Evict(IReadOnlyCollection<IReadOnlyCacheEntry> entries, DateTimeOffset utcNow);
     }
 }

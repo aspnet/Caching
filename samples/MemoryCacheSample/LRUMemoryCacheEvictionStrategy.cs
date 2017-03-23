@@ -20,7 +20,7 @@ namespace MemoryCacheSample
             _evictExpiredStrategy = new MemoryCacheEvictionStrategy();
         }
 
-        public int Evict(IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>> entries, DateTimeOffset utcNow)
+        public int Evict(IReadOnlyCollection<IReadOnlyCacheEntry> entries, DateTimeOffset utcNow)
         {
             var expiredCount = _evictExpiredStrategy.Evict(entries, utcNow);
             var removalTarget = entries.Count - expiredCount - _entryLimit; // assume underflow is handled
@@ -31,11 +31,11 @@ namespace MemoryCacheSample
             }
 
             var removedEntries = 0;
-            foreach (var entry in entries.OrderBy(e => e.Value.LastAccessed))
+            foreach (var entry in entries.OrderBy(e => e.LastAccessed))
             {
-                if (!entry.Value.IsExpired)
+                if (!entry.IsExpired)
                 {
-                    entry.Value.Evict();
+                    entry.Evict();
                     removedEntries++;
                 }
                 if (removedEntries == removalTarget)

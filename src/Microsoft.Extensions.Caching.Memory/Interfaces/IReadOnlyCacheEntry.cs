@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.Caching.Memory
     /// <summary>
     /// Represents an entry retrieved from the <see cref="IMemoryCache"/> implementation.
     /// </summary>
-    public interface IRetrievedCacheEntry
+    public interface IReadOnlyCacheEntry
     {
         /// <summary>
         /// Gets the key of the cache entry.

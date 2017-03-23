@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Extensions.Internal;
@@ -14,9 +13,9 @@ namespace Microsoft.Extensions.Caching.Memory
     /// An implementation of <see cref="IMemoryCache"/> using a dictionary to
     /// store its entries.
     /// </summary>
-    public class MemoryCache : IMemoryCache, IReadOnlyCollection<KeyValuePair<object, IRetrievedCacheEntry>>
+    public partial class MemoryCache : IMemoryCache
     {
-        private readonly ConcurrentDictionary<object, IRetrievedCacheEntry> _entries;
+        private readonly ConcurrentDictionary<object, IReadOnlyCacheEntry> _entries;
         private bool _disposed;
 
         // We store the delegates locally to prevent allocations
@@ -40,7 +39,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
 
             var options = optionsAccessor.Value;
-            _entries = new ConcurrentDictionary<object, IRetrievedCacheEntry>();
+            _entries = new ConcurrentDictionary<object, IReadOnlyCacheEntry>();
             _setEntry = SetEntry;
             _entryExpirationNotification = EntryExpired;
 
@@ -66,7 +65,7 @@ namespace Microsoft.Extensions.Caching.Memory
             get { return _entries.Count; }
         }
 
-        private ICollection<KeyValuePair<object, IRetrievedCacheEntry>> EntriesCollection => _entries;
+        private ICollection<KeyValuePair<object, IReadOnlyCacheEntry>> EntriesCollection => _entries;
 
         /// <inheritdoc />
         public ICacheEntry CreateEntry(object key)
@@ -114,7 +113,7 @@ namespace Microsoft.Extensions.Caching.Memory
             // Initialize the last access timestamp at the time the entry is added
             entry.LastAccessed = utcNow;
 
-            IRetrievedCacheEntry priorEntry;
+            IReadOnlyCacheEntry priorEntry;
             if (_entries.TryGetValue(entry.Key, out priorEntry))
             {
                 ((CacheEntry)priorEntry).SetExpired(EvictionReason.Replaced);
@@ -167,7 +166,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(new ReadOnlyCacheEntries(_entries));
         }
 
         /// <inheritdoc />
@@ -184,7 +183,7 @@ namespace Microsoft.Extensions.Caching.Memory
             var utcNow = _clock.UtcNow;
             var found = false;
 
-            IRetrievedCacheEntry retrievedEntry;
+            IReadOnlyCacheEntry retrievedEntry;
             if (_entries.TryGetValue(key, out retrievedEntry))
             {
                 var entry = (CacheEntry)retrievedEntry;
@@ -208,7 +207,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 }
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(new ReadOnlyCacheEntries(_entries));
 
             return found;
         }
@@ -222,7 +221,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
 
             CheckDisposed();
-            IRetrievedCacheEntry entry;
+            IReadOnlyCacheEntry entry;
             if (_entries.TryRemove(key, out entry))
             {
                 var cacheEntry = (CacheEntry)entry;
@@ -230,12 +229,12 @@ namespace Microsoft.Extensions.Caching.Memory
                 cacheEntry.InvokeEvictionCallbacks();
             }
 
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(new ReadOnlyCacheEntries(_entries));
         }
 
-        private void RemoveEntry(IRetrievedCacheEntry entry)
+        private void RemoveEntry(IReadOnlyCacheEntry entry)
         {
-            if (EntriesCollection.Remove(new KeyValuePair<object, IRetrievedCacheEntry>(entry.Key, entry)))
+            if (EntriesCollection.Remove(new KeyValuePair<object, IReadOnlyCacheEntry>(entry.Key, entry)))
             {
                 ((CacheEntry)entry).InvokeEvictionCallbacks();
             }
@@ -245,12 +244,12 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             // TODO: For efficiency consider processing these expirations in batches.
             RemoveEntry(entry);
-            _evictionTrigger.Resume(this);
+            _evictionTrigger.Resume(new ReadOnlyCacheEntries(_entries));
         }
 
         private int ExecuteCacheEviction()
         {
-            var evictCount = _evictionStrategy.Evict(this, _clock.UtcNow); // TODO: anything else eviction strategies need?
+            var evictCount = _evictionStrategy.Evict(new ReadOnlyCacheEntries(_entries), _clock.UtcNow); // TODO: anything else eviction strategies need?
             
             foreach (var entry in _entries)
             {
@@ -289,16 +288,6 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ObjectDisposedException(typeof(MemoryCache).FullName);
             }
-        }
-
-        public IEnumerator<KeyValuePair<object, IRetrievedCacheEntry>> GetEnumerator()
-        {
-            return _entries.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }
