@@ -175,7 +175,9 @@ namespace Microsoft.Extensions.Caching.Memory
             return _isExpired || CheckForExpiredTime(now) || CheckForExpiredTokens();
         }
 
-        public void SetExpired(EvictionReason reason)
+        public void Evict() => SetExpired(EvictionReason.Capacity);
+
+        internal void SetExpired(EvictionReason reason)
         {
             if (EvictionReason == EvictionReason.None)
             {

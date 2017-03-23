@@ -117,7 +117,7 @@ namespace Microsoft.Extensions.Caching.Memory
             IRetrievedCacheEntry priorEntry;
             if (_entries.TryGetValue(entry.Key, out priorEntry))
             {
-                priorEntry.SetExpired(EvictionReason.Replaced);
+                ((CacheEntry)priorEntry).SetExpired(EvictionReason.Replaced);
             }
 
             if (!entry.CheckExpired(utcNow))
@@ -225,8 +225,9 @@ namespace Microsoft.Extensions.Caching.Memory
             IRetrievedCacheEntry entry;
             if (_entries.TryRemove(key, out entry))
             {
-                entry.SetExpired(EvictionReason.Removed);
-                ((CacheEntry)entry).InvokeEvictionCallbacks();
+                var cacheEntry = (CacheEntry)entry;
+                cacheEntry.SetExpired(EvictionReason.Removed);
+                cacheEntry.InvokeEvictionCallbacks();
             }
 
             _evictionTrigger.Resume(this);

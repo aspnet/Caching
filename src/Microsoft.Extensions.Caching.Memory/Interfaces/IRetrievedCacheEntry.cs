@@ -39,6 +39,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         bool CheckExpired(DateTimeOffset utcNow);
 
-        void SetExpired(EvictionReason reason);
+        void Evict();
     }
 }

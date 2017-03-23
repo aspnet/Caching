@@ -35,7 +35,7 @@ namespace MemoryCacheSample
             {
                 if (!entry.Value.IsExpired)
                 {
-                    entry.Value.SetExpired(EvictionReason.Capacity);
+                    entry.Value.Evict();
                     removedEntries++;
                 }
                 if (removedEntries == removalTarget)
