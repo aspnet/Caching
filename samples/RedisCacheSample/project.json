@@ -3,7 +3,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.Extensions.Caching.Redis": "1.1.1"
+    "Microsoft.Extensions.Caching.Redis": "1.1.2"
   },
   "frameworks": {
     "net451": {},
