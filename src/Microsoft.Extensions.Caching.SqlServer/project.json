@@ -17,7 +17,7 @@
   "frameworks": {
     "netstandard1.2": {
       "dependencies": {
-        "System.Data.SqlClient": "4.3.0"
+        "System.Data.SqlClient": "4.3.1"
       }
     }
   },
