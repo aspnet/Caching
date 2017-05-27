@@ -23,5 +23,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         void Remove(string key);
 
         Task RemoveAsync(string key, CancellationToken token = default(CancellationToken));
+        
+        void Clear(string prefix);
     }
 }
