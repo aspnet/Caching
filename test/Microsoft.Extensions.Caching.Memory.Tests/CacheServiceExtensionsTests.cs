@@ -125,6 +125,11 @@ namespace Microsoft.Extensions.Caching.Distributed
             {
                 throw new NotImplementedException();
             }
+
+            public void Compact(double percentage)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class TestDistributedCache : IDistributedCache

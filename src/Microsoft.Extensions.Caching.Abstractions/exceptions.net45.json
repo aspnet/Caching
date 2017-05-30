@@ -1,0 +1,8 @@
+[
+  {
+    "OldTypeId": "public interface Microsoft.Extensions.Caching.Memory.IMemoryCache : System.IDisposable",
+    "NewTypeId": "public interface Microsoft.Extensions.Caching.Memory.IMemoryCache : System.IDisposable",
+    "NewMemberId": "System.Void Compact(System.Double percentage)",
+    "Kind": "Addition"
+  }
+]

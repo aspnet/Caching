@@ -30,5 +30,11 @@ namespace Microsoft.Extensions.Caching.Memory
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
         void Remove(object key);
+
+        /// <summary>
+        /// Attempt to remove the given percentage of the total entries in the cache.
+        /// </summary>
+        /// <param name="percentage">The percentage of cache entries to remove.</param>
+        void Compact(double percentage);
     }
 }
