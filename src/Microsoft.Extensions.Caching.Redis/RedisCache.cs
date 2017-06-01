@@ -247,7 +247,10 @@ namespace Microsoft.Extensions.Caching.Redis
 
             return null;
         }
-
+        public void Clear(string prefix)
+        {
+            _cache.KeyDeleteWithPrefix(prefix+"*");
+        }
         private async Task<byte[]> GetAndRefreshAsync(string key, bool getData, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
