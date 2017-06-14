@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Caching.Redis
         private const string DataKey = "data";
         private const long NotPresent = -1;
 
-        private volatile ConnectionMultiplexer _connection;
+        private volatile IConnectionMultiplexer _connection;
         private IDatabase _cache;
 
         private readonly RedisCacheOptions _options;
@@ -48,6 +48,16 @@ namespace Microsoft.Extensions.Caching.Redis
 
             // This allows partitioning a single backend cache for use with multiple apps/services.
             _instance = _options.InstanceName ?? string.Empty;
+        }
+
+        public RedisCache(IOptions<RedisCacheOptions> optionsAccessor, IConnectionMultiplexer connection):this(optionsAccessor)
+        {
+            if (connection == null)
+            {
+                throw new ArgumentNullException(nameof(connection));
+            }
+
+            _connection = connection;
         }
 
         public byte[] Get(string key)
