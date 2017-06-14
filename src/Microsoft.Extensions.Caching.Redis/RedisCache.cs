@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Caching.Redis
         private const string DataKey = "data";
         private const long NotPresent = -1;
 
-        private volatile ConnectionMultiplexer _connection;
+        private volatile IConnectionMultiplexer _connection;
         private IDatabase _cache;
 
         private readonly RedisCacheOptions _options;
@@ -48,6 +48,16 @@ namespace Microsoft.Extensions.Caching.Redis
 
             // This allows partitioning a single backend cache for use with multiple apps/services.
             _instance = _options.InstanceName ?? string.Empty;
+        }
+
+        public RedisCache(IOptions<RedisCacheOptions> optionsAccessor, IConnectionMultiplexer connection):this(optionsAccessor)
+        {
+            if (connection == null)
+            {
+                throw new ArgumentNullException(nameof(connection));
+            }
+
+            _connection = connection;
         }
 
         public byte[] Get(string key)
@@ -164,7 +174,7 @@ namespace Microsoft.Extensions.Caching.Redis
 
         private void Connect()
         {
-            if (_connection != null)
+            if (_connection != null && _cache == null)
             {
                 return;
             }
@@ -175,7 +185,11 @@ namespace Microsoft.Extensions.Caching.Redis
                 if (_connection == null)
                 {
                     _connection = ConnectionMultiplexer.Connect(_options.Configuration);
-                    _cache = _connection.GetDatabase();
+
+                }
+                if (_cache == null)
+                {
+                    _cache = _connection.GetDatabase(_options.Database ?? 0);
                 }
             }
             finally
@@ -188,7 +202,7 @@ namespace Microsoft.Extensions.Caching.Redis
         {
             token.ThrowIfCancellationRequested();
 
-            if (_connection != null)
+            if (_connection != null && _cache == null)
             {
                 return;
             }
@@ -199,7 +213,11 @@ namespace Microsoft.Extensions.Caching.Redis
                 if (_connection == null)
                 {
                     _connection = await ConnectionMultiplexer.ConnectAsync(_options.Configuration);
-                    _cache = _connection.GetDatabase();
+                   
+                }
+                if (_cache == null)
+                {
+                    _cache = _connection.GetDatabase(_options.Database??0);
                 }
             }
             finally
