@@ -108,5 +108,24 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.Equal(9, cache.Count);
             Assert.Null(cache.Get("key0"));
         }
+
+        [Fact]
+        public void NoCompactionWhenNoMaximumEntriesCountSpecified()
+        {
+            var cache = CreateCache();
+
+            for (var i = 0; i < 9; i++)
+            {
+                cache.Set($"key{i}", $"value{i}");
+            }
+
+            // There should be 9 items in the cache
+            Assert.Equal(9, cache.Count);
+
+            cache.Set("key9", "value9");
+
+            // There should be 10 items in the cache
+            Assert.Equal(10, cache.Count);
+        }
     }
 }
