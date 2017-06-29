@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _expirationScanFrequency = options.ExpirationScanFrequency;
-            _maximumEntriesCount = options.MaximumEntriesCount;
+            _maximumEntriesCount = options.EntryCountLimit;
             _lastExpirationScan = _clock.UtcNow;
         }
 

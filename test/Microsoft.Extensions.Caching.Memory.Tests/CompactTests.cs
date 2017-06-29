@@ -90,7 +90,7 @@ namespace Microsoft.Extensions.Caching.Memory
             var cache = new MemoryCache(new MemoryCacheOptions
             {
                 Clock = testClock,
-                MaximumEntriesCount = 9
+                EntryCountLimit = 9
             });
 
             for (var i = 0; i < 9; i++)

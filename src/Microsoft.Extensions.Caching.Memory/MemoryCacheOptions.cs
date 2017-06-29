@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
 
-        public int? MaximumEntriesCount { get; set; }
+        public int? EntryCountLimit { get; set; }
 
         MemoryCacheOptions IOptions<MemoryCacheOptions>.Value
         {
