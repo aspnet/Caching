@@ -27,6 +27,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
+        private readonly int? _maximumEntriesCount;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
@@ -49,6 +50,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _expirationScanFrequency = options.ExpirationScanFrequency;
+            _maximumEntriesCount = options.MaximumEntriesCount;
             _lastExpirationScan = _clock.UtcNow;
         }
 
@@ -148,6 +150,12 @@ namespace Microsoft.Extensions.Caching.Memory
                 if (entryAdded)
                 {
                     entry.AttachTokens();
+
+                    // Compact by 10 percent if we exceed the given maximum number of cache entries
+                    if (_entries.Count > _maximumEntriesCount)
+                    {
+                        Compact(0.10);
+                    }
                 }
                 else
                 {

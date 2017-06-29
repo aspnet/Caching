@@ -82,5 +82,31 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.Equal(1, cache.Count);
             Assert.Equal("value4", cache.Get("key4"));
         }
+
+        [Fact]
+        public void CompactWhenMaximumEntriesCountExceeded()
+        {
+            var testClock = new TestClock();
+            var cache = new MemoryCache(new MemoryCacheOptions
+            {
+                Clock = testClock,
+                MaximumEntriesCount = 9
+            });
+
+            for (var i = 0; i < 9; i++)
+            {
+                cache.Set($"key{i}", $"value{i}");
+                testClock.Add(TimeSpan.FromSeconds(1));
+            }
+
+            // There should be 9 items in the cache
+            Assert.Equal(9, cache.Count);
+
+            cache.Set("key9", "value9");
+
+            // There should still only be 9 items in the cache after the oldest entry is evicted
+            Assert.Equal(9, cache.Count);
+            Assert.Null(cache.Get("key0"));
+        }
     }
 }
