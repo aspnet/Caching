@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Caching.Memory
     public class MemoryCache : IMemoryCache
     {
         private readonly ConcurrentDictionary<object, CacheEntry> _entries;
+        private readonly SemaphoreSlim _compactionSemaphore = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private bool _disposed;
 
         // We store the delegates locally to prevent allocations
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
-        private readonly int? _maximumEntriesCount;
+        private readonly int? _entryCountLimit;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
@@ -50,7 +51,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _expirationScanFrequency = options.ExpirationScanFrequency;
-            _maximumEntriesCount = options.EntryCountLimit;
+            _entryCountLimit = options.EntryCountLimit;
             _lastExpirationScan = _clock.UtcNow;
         }
 
@@ -151,10 +152,10 @@ namespace Microsoft.Extensions.Caching.Memory
                 {
                     entry.AttachTokens();
 
-                    // Compact by 10 percent if we exceed the given maximum number of cache entries
-                    if (_entries.Count > _maximumEntriesCount)
+                    // Compact if the given maximum number of cache entries is exceeded
+                    if (_entries.Count > _entryCountLimit)
                     {
-                        Compact(0.10);
+                        TriggerOvercapacityCompaction();
                     }
                 }
                 else
@@ -280,6 +281,27 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
+        private void TriggerOvercapacityCompaction()
+        {
+            if (!_compactionSemaphore.Wait(0))
+            {
+                // Another compaction is running, exit immediately.
+                // Avoid overpurging when multiple overcapacity compactions are triggered concurrently.
+                return;
+            }
+
+            try
+            {
+                // Keep compacting until remaining entries are at 90% of maximum
+                // Stop compacting if no entries were removed, for example if all the remaining entries are pinned with NeverRemove priority
+                while (Compact(1 - ((0.9 * _entryCountLimit.Value) / _entries.Count)) && _entries.Count > _entryCountLimit.Value) { }
+            }
+            finally
+            {
+                _compactionSemaphore.Release();
+            }
+        }
+
         /// Remove at least the given percentage (0.10 for 10%) of the total entries (or estimated memory?), according to the following policy:
         /// 1. Remove all expired items.
         /// 2. Bucket by CacheItemPriority.
@@ -287,7 +309,8 @@ namespace Microsoft.Extensions.Caching.Memory
         /// ?. Items with the soonest absolute expiration.
         /// ?. Items with the soonest sliding expiration.
         /// ?. Larger objects - estimated by object graph size, inaccurate.
-        public void Compact(double percentage)
+        /// Returns true if at least one entry was removed, otherwise false.
+        public bool Compact(double percentage)
         {
             var entriesToRemove = new List<CacheEntry>();
             var lowPriEntries = new List<CacheEntry>();
@@ -329,10 +352,14 @@ namespace Microsoft.Extensions.Caching.Memory
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, highPriEntries);
 
+            var removedEntries = entriesToRemove.Count > 0;
+
             foreach (var entry in entriesToRemove)
             {
                 RemoveEntry(entry);
             }
+
+            return removedEntries;
         }
 
         /// Policy:

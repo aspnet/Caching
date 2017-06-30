@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using Microsoft.Extensions.Internal;
 using Xunit;
 
@@ -103,6 +104,9 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.Equal(9, cache.Count);
 
             cache.Set("key9", "value9");
+
+            // Wait 1 second for compaction to complete
+            Thread.Sleep(TimeSpan.FromSeconds(1));
 
             // There should still only be 9 items in the cache after the oldest entry is evicted
             Assert.Equal(9, cache.Count);

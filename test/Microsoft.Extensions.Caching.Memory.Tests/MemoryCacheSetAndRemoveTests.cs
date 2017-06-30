@@ -458,6 +458,52 @@ namespace Microsoft.Extensions.Caching.Memory
             Task.WaitAll(task0, task1, task2, task3);
         }
 
+
+        [Fact]
+        public void OvercapacityPurge_AreThreadSafe()
+        {
+            var cache = new MemoryCache(new MemoryCacheOptions
+            {
+                EntryCountLimit = 9
+            });
+            var cts = new CancellationTokenSource();
+
+            var task0 = Task.Run(() =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    cache.Set(Guid.NewGuid(), Guid.NewGuid());
+                }
+            }, cts.Token);
+
+            var task1 = Task.Run(() =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    cache.Set(Guid.NewGuid(), Guid.NewGuid());
+                }
+            }, cts.Token);
+
+            var task2 = Task.Run(() =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    cache.Set(Guid.NewGuid(), Guid.NewGuid());
+                }
+            }, cts.Token);
+
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
+            var task3 = Task.Delay(TimeSpan.FromSeconds(6));
+
+            Task.WaitAll(task0, task1, task2, task3);
+
+            Assert.Equal(TaskStatus.RanToCompletion, task0.Status);
+            Assert.Equal(TaskStatus.RanToCompletion, task1.Status);
+            Assert.Equal(TaskStatus.RanToCompletion, task2.Status);
+            Assert.Equal(TaskStatus.RanToCompletion, task3.Status);
+            Assert.Equal(9, cache.Count);
+        }
+
         private class TestKey
         {
             public override bool Equals(object obj) => true;
