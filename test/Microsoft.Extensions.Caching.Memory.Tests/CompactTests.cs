@@ -91,26 +91,26 @@ namespace Microsoft.Extensions.Caching.Memory
             var cache = new MemoryCache(new MemoryCacheOptions
             {
                 Clock = testClock,
-                EntryCountLimit = 19
+                EntryCountLimit = 10
             });
 
-            for (var i = 0; i < 19; i++)
+            for (var i = 0; i < 10; i++)
             {
                 cache.Set($"key{i}", $"value{i}");
                 testClock.Add(TimeSpan.FromSeconds(1));
             }
 
-            // There should be 19 items in the cache
-            Assert.Equal(19, cache.Count);
+            // There should be 10 items in the cache
+            Assert.Equal(10, cache.Count);
 
-            cache.Set("key19", "value19");
+            cache.Set("key10", "value10");
 
             // Wait 1 second for compaction to complete
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
-            // There should be 18 items in the cache, the new entry isn't added and the oldest is evicted
-            Assert.Equal(18, cache.Count);
-            Assert.Null(cache.Get("key19"));
+            // There should be 9 items in the cache, the new entry isn't added and the oldest is evicted
+            Assert.Equal(9, cache.Count);
+            Assert.Null(cache.Get("key10"));
             Assert.Null(cache.Get("key0"));
         }
 
@@ -119,18 +119,18 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var cache = CreateCache();
 
-            for (var i = 0; i < 19; i++)
+            for (var i = 0; i < 10; i++)
             {
                 cache.Set($"key{i}", $"value{i}");
             }
 
-            // There should be 19 items in the cache
-            Assert.Equal(19, cache.Count);
-
-            cache.Set("key19", "value19");
-
             // There should be 10 items in the cache
-            Assert.Equal(20, cache.Count);
+            Assert.Equal(10, cache.Count);
+
+            cache.Set("key10", "value10");
+
+            // There should be 11 items in the cache
+            Assert.Equal(11, cache.Count);
         }
     }
 }

@@ -154,7 +154,7 @@ namespace Microsoft.Extensions.Caching.Memory
                     if (_entries.Count > _entryCountLimit)
                     {
                         entry.SetExpired(EvictionReason.Capacity);
-                        entry.InvokeEvictionCallbacks();
+                        RemoveEntry(entry);
 
                         TriggerOvercapacityCompaction();
                     }
