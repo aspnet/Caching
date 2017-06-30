@@ -150,12 +150,17 @@ namespace Microsoft.Extensions.Caching.Memory
 
                 if (entryAdded)
                 {
-                    entry.AttachTokens();
-
-                    // Compact if the given maximum number of cache entries is exceeded
+                    // Remove the entry and compact if the given maximum number of cache entries is exceeded
                     if (_entries.Count > _entryCountLimit)
                     {
+                        entry.SetExpired(EvictionReason.Capacity);
+                        entry.InvokeEvictionCallbacks();
+
                         TriggerOvercapacityCompaction();
+                    }
+                    else
+                    {
+                        entry.AttachTokens();
                     }
                 }
                 else
@@ -294,9 +299,8 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 try
                 {
-                    // Keep compacting until remaining entries are at 90% of maximum
-                    // Stop compacting if no entries were removed, for example if all the remaining entries are pinned with NeverRemove priority
-                    while (Compact(1 - ((0.9 * _entryCountLimit.Value) / _entries.Count)) && _entries.Count > _entryCountLimit.Value) { }
+                    // Compact 10%
+                    Compact(0.10);
                 }
                 finally
                 {

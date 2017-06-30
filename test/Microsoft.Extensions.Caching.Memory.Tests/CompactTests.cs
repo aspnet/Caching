@@ -85,31 +85,32 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         [Fact]
-        public void CompactWhenMaximumEntriesCountExceeded()
+        public void DoNotAddWhenMaximumEntriesCountExceeded()
         {
             var testClock = new TestClock();
             var cache = new MemoryCache(new MemoryCacheOptions
             {
                 Clock = testClock,
-                EntryCountLimit = 9
+                EntryCountLimit = 19
             });
 
-            for (var i = 0; i < 9; i++)
+            for (var i = 0; i < 19; i++)
             {
                 cache.Set($"key{i}", $"value{i}");
                 testClock.Add(TimeSpan.FromSeconds(1));
             }
 
-            // There should be 9 items in the cache
-            Assert.Equal(9, cache.Count);
+            // There should be 19 items in the cache
+            Assert.Equal(19, cache.Count);
 
-            cache.Set("key9", "value9");
+            cache.Set("key19", "value19");
 
             // Wait 1 second for compaction to complete
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
-            // There should still only be 9 items in the cache after the oldest entry is evicted
-            Assert.Equal(9, cache.Count);
+            // There should be 18 items in the cache, the new entry isn't added and the oldest is evicted
+            Assert.Equal(18, cache.Count);
+            Assert.Null(cache.Get("key19"));
             Assert.Null(cache.Get("key0"));
         }
 
@@ -118,18 +119,18 @@ namespace Microsoft.Extensions.Caching.Memory
         {
             var cache = CreateCache();
 
-            for (var i = 0; i < 9; i++)
+            for (var i = 0; i < 19; i++)
             {
                 cache.Set($"key{i}", $"value{i}");
             }
 
-            // There should be 9 items in the cache
-            Assert.Equal(9, cache.Count);
+            // There should be 19 items in the cache
+            Assert.Equal(19, cache.Count);
 
-            cache.Set("key9", "value9");
+            cache.Set("key19", "value19");
 
             // There should be 10 items in the cache
-            Assert.Equal(10, cache.Count);
+            Assert.Equal(20, cache.Count);
         }
     }
 }
