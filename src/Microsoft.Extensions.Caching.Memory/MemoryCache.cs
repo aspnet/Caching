@@ -290,16 +290,19 @@ namespace Microsoft.Extensions.Caching.Memory
                 return;
             }
 
-            try
+            Task.Run(() =>
             {
-                // Keep compacting until remaining entries are at 90% of maximum
-                // Stop compacting if no entries were removed, for example if all the remaining entries are pinned with NeverRemove priority
-                while (Compact(1 - ((0.9 * _entryCountLimit.Value) / _entries.Count)) && _entries.Count > _entryCountLimit.Value) { }
-            }
-            finally
-            {
-                _compactionSemaphore.Release();
-            }
+                try
+                {
+                    // Keep compacting until remaining entries are at 90% of maximum
+                    // Stop compacting if no entries were removed, for example if all the remaining entries are pinned with NeverRemove priority
+                    while (Compact(1 - ((0.9 * _entryCountLimit.Value) / _entries.Count)) && _entries.Count > _entryCountLimit.Value) { }
+                }
+                finally
+                {
+                    _compactionSemaphore.Release();
+                }
+            });
         }
 
         /// Remove at least the given percentage (0.10 for 10%) of the total entries (or estimated memory?), according to the following policy:
