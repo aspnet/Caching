@@ -316,8 +316,7 @@ namespace Microsoft.Extensions.Caching.Memory
         /// ?. Items with the soonest absolute expiration.
         /// ?. Items with the soonest sliding expiration.
         /// ?. Larger objects - estimated by object graph size, inaccurate.
-        /// Returns true if at least one entry was removed, otherwise false.
-        public bool Compact(double percentage)
+        public void Compact(double percentage)
         {
             var entriesToRemove = new List<CacheEntry>();
             var lowPriEntries = new List<CacheEntry>();
@@ -359,14 +358,10 @@ namespace Microsoft.Extensions.Caching.Memory
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, normalPriEntries);
             ExpirePriorityBucket(removalCountTarget, entriesToRemove, highPriEntries);
 
-            var removedEntries = entriesToRemove.Count > 0;
-
             foreach (var entry in entriesToRemove)
             {
                 RemoveEntry(entry);
             }
-
-            return removedEntries;
         }
 
         /// Policy:

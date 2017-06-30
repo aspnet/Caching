@@ -28,10 +28,5 @@
     "TypeId": "public class Microsoft.Extensions.Caching.Distributed.MemoryDistributedCache : Microsoft.Extensions.Caching.Distributed.IDistributedCache",
     "MemberId": "public System.Threading.Tasks.Task<System.Byte[]> GetAsync(System.String key)",
     "Kind": "Removal"
-  },
-  {
-    "TypeId": "public class Microsoft.Extensions.Caching.Memory.MemoryCache : Microsoft.Extensions.Caching.Memory.IMemoryCache",
-    "MemberId": "public System.Void Compact(System.Double percentage)",
-    "Kind": "Removal"
   }
 ]
