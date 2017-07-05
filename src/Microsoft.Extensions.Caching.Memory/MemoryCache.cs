@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Caching.Memory
     public class MemoryCache : IMemoryCache
     {
         private readonly ConcurrentDictionary<object, CacheEntry> _entries;
+        private readonly SemaphoreSlim _compactionSemaphore = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private bool _disposed;
 
         // We store the delegates locally to prevent allocations
@@ -27,6 +28,7 @@ namespace Microsoft.Extensions.Caching.Memory
         private readonly Action<CacheEntry> _entryExpirationNotification;
 
         private readonly ISystemClock _clock;
+        private readonly int? _entryCountLimit;
 
         private TimeSpan _expirationScanFrequency;
         private DateTimeOffset _lastExpirationScan;
@@ -49,6 +51,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
             _clock = options.Clock ?? new SystemClock();
             _expirationScanFrequency = options.ExpirationScanFrequency;
+            _entryCountLimit = options.EntryCountLimit;
             _lastExpirationScan = _clock.UtcNow;
         }
 
@@ -147,7 +150,18 @@ namespace Microsoft.Extensions.Caching.Memory
 
                 if (entryAdded)
                 {
-                    entry.AttachTokens();
+                    // Remove the entry and compact if the given maximum number of cache entries is exceeded
+                    if (_entries.Count > _entryCountLimit)
+                    {
+                        entry.SetExpired(EvictionReason.Capacity);
+                        RemoveEntry(entry);
+
+                        TriggerOvercapacityCompaction();
+                    }
+                    else
+                    {
+                        entry.AttachTokens();
+                    }
                 }
                 else
                 {
@@ -270,6 +284,29 @@ namespace Microsoft.Extensions.Caching.Memory
                     cache.RemoveEntry(entry);
                 }
             }
+        }
+
+        private void TriggerOvercapacityCompaction()
+        {
+            if (!_compactionSemaphore.Wait(0))
+            {
+                // Another compaction is running, exit immediately.
+                // Avoid overpurging when multiple overcapacity compactions are triggered concurrently.
+                return;
+            }
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    // Compact 10%
+                    Compact(0.10);
+                }
+                finally
+                {
+                    _compactionSemaphore.Release();
+                }
+            });
         }
 
         /// Remove at least the given percentage (0.10 for 10%) of the total entries (or estimated memory?), according to the following policy:

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using Microsoft.Extensions.Internal;
 using Xunit;
 
@@ -81,6 +82,55 @@ namespace Microsoft.Extensions.Caching.Memory
             cache.Compact(0.90);
             Assert.Equal(1, cache.Count);
             Assert.Equal("value4", cache.Get("key4"));
+        }
+
+        [Fact]
+        public void DoNotAddWhenMaximumEntriesCountExceeded()
+        {
+            var testClock = new TestClock();
+            var cache = new MemoryCache(new MemoryCacheOptions
+            {
+                Clock = testClock,
+                EntryCountLimit = 10
+            });
+
+            for (var i = 0; i < 10; i++)
+            {
+                cache.Set($"key{i}", $"value{i}");
+                testClock.Add(TimeSpan.FromSeconds(1));
+            }
+
+            // There should be 10 items in the cache
+            Assert.Equal(10, cache.Count);
+
+            cache.Set("key10", "value10");
+
+            // Wait 1 second for compaction to complete
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+            // There should be 9 items in the cache, the new entry isn't added and the oldest is evicted
+            Assert.Equal(9, cache.Count);
+            Assert.Null(cache.Get("key10"));
+            Assert.Null(cache.Get("key0"));
+        }
+
+        [Fact]
+        public void NoCompactionWhenNoMaximumEntriesCountSpecified()
+        {
+            var cache = CreateCache();
+
+            for (var i = 0; i < 10; i++)
+            {
+                cache.Set($"key{i}", $"value{i}");
+            }
+
+            // There should be 10 items in the cache
+            Assert.Equal(10, cache.Count);
+
+            cache.Set("key10", "value10");
+
+            // There should be 11 items in the cache
+            Assert.Equal(11, cache.Count);
         }
     }
 }
