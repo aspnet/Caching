@@ -47,9 +47,9 @@ namespace SqlServerCacheConcurrencySample
 
             PeriodicallyReadKey(cache, TimeSpan.FromSeconds(1));
 
-            PeriodciallyRemoveKey(cache, TimeSpan.FromSeconds(11));
+            PeriodicallyRemoveKey(cache, TimeSpan.FromSeconds(11));
 
-            PeriodciallySetKey(cache, TimeSpan.FromSeconds(13));
+            PeriodicallySetKey(cache, TimeSpan.FromSeconds(13));
 
             Console.ReadLine();
             Console.WriteLine("Shutting down");
@@ -61,7 +61,7 @@ namespace SqlServerCacheConcurrencySample
             cache.Set(Key, Encoding.UTF8.GetBytes(value), _cacheEntryOptions);
         }
 
-        private static void PeriodciallySetKey(IDistributedCache cache, TimeSpan interval)
+        private static void PeriodicallySetKey(IDistributedCache cache, TimeSpan interval)
         {
             Task.Run(async () =>
             {
@@ -101,7 +101,7 @@ namespace SqlServerCacheConcurrencySample
             });
         }
 
-        private static void PeriodciallyRemoveKey(IDistributedCache cache, TimeSpan interval)
+        private static void PeriodicallyRemoveKey(IDistributedCache cache, TimeSpan interval)
         {
             Task.Run(async () =>
             {
