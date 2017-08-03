@@ -16,6 +16,11 @@ namespace Microsoft.Extensions.Caching.Redis
         public string Configuration { get; set; }
 
         /// <summary>
+        /// The database to be used 
+        /// </summary>
+        public int? Database { get; set; }
+
+        /// <summary>
         /// The Redis instance name.
         /// </summary>
         public string InstanceName { get; set; }
