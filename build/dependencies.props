@@ -1,15 +1,20 @@
 ﻿<Project>
   <PropertyGroup>
-    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <CoreFxVersion>4.4.0</CoreFxVersion>
-    <InternalAspNetCoreSdkVersion>2.0.1-rtm-15400</InternalAspNetCoreSdkVersion>
-    <MoqVersion>4.7.49</MoqVersion>
-    <NETStandardImplicitPackageVersion>2.0.0</NETStandardImplicitPackageVersion>
-    <RedisVersion>1.2.4</RedisVersion>
-    <RuntimeFrameworkVersion Condition="'$(TargetFramework)'=='netcoreapp2.0'">2.0.0</RuntimeFrameworkVersion>
-    <TestSdkVersion>15.3.0</TestSdkVersion>
-    <XunitVersion>2.3.0-beta2-build3683</XunitVersion>
-    <XunitRunnerVisualStudioVersion>2.3.0-beta2-build1317</XunitRunnerVisualStudioVersion>
+    <InternalAspNetCoreSdkPackageVersion>2.0.2-beta-15522</InternalAspNetCoreSdkPackageVersion>
+    <MicrosoftAspNetCoreTestingPackageVersion>2.0.0</MicrosoftAspNetCoreTestingPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>2.0.0</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>2.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsDependencyInjectionAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>2.0.0</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>2.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsOptionsPackageVersion>2.0.0</MicrosoftExtensionsOptionsPackageVersion>
+    <MicrosoftExtensionsPrimitivesPackageVersion>2.0.0</MicrosoftExtensionsPrimitivesPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.3.0</MicrosoftNETTestSdkPackageVersion>
+    <MoqPackageVersion>4.7.49</MoqPackageVersion>
+    <StackExchangeRedisStrongNamePackageVersion>1.2.4</StackExchangeRedisStrongNamePackageVersion>
+    <SystemDataSqlClientPackageVersion>4.4.0</SystemDataSqlClientPackageVersion>
+    <XunitPackageVersion>2.3.0-beta2-build3683</XunitPackageVersion>
+    <XunitRunnerVisualStudioPackageVersion>2.3.0-beta2-build1317</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
 
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
