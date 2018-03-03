@@ -9,35 +9,21 @@ namespace Microsoft.Extensions.Caching.Memory
 {
     public static class CacheExtensions
     {
-
         public static object Get(this IMemoryCache cache, object key)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
-
             cache.TryGetValue(key, out object value);
             return value;
         }
 
         public static TItem Get<TItem>(this IMemoryCache cache, object key)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
-
             cache.TryGetValue<TItem>(key, out TItem value);
             return value;
         }
 
         public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, out TItem value)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
 
             if (cache.TryGetValue(key, out object result))
             {
@@ -45,16 +31,13 @@ namespace Microsoft.Extensions.Caching.Memory
                 return true;
             }
 
-            value = default(TItem);
+            value = default;
             return false;
         }
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
 
             var entry = cache.CreateEntry(key);
             entry.Value = value;
@@ -65,10 +48,8 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, DateTimeOffset absoluteExpiration)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
+
             var entry = cache.CreateEntry(key);
             entry.AbsoluteExpiration = absoluteExpiration;
             entry.Value = value;
@@ -79,10 +60,8 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, TimeSpan absoluteExpirationRelativeToNow)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
+
             var entry = cache.CreateEntry(key);
             entry.AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;
             entry.Value = value;
@@ -93,15 +72,9 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
 
-            if (expirationToken == null)
-            {
-                throw new System.ArgumentNullException(nameof(expirationToken));
-            }
+            ValidateChangeToken(expirationToken);
 
             var entry = cache.CreateEntry(key);
             entry.AddExpirationToken(expirationToken);
@@ -113,10 +86,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, MemoryCacheEntryOptions options)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
+            ValidateCacheKey(key);
 
             using (var entry = cache.CreateEntry(key))
             {
@@ -133,11 +103,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem GetOrCreate<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, TItem> factory)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
-
             if (!cache.TryGetValue(key, out object result))
             {
                 var entry = cache.CreateEntry(key);
@@ -154,10 +119,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static async Task<TItem> GetOrCreateAsync<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, Task<TItem>> factory)
         {
-            if (key == null)
-            {
-                throw new System.ArgumentNullException(nameof(key));
-            }
             if (!cache.TryGetValue(key, out object result))
             {
                 var entry = cache.CreateEntry(key);
@@ -171,5 +132,23 @@ namespace Microsoft.Extensions.Caching.Memory
 
             return (TItem)result;
         }
+
+        #region Private Members
+        private static void ValidateCacheKey(object key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+        }
+
+        private static void ValidateChangeToken(IChangeToken expirationToken)
+        {
+            if (expirationToken == null)
+            {
+                throw new ArgumentNullException(nameof(expirationToken));
+            }
+        }
+        #endregion
     }
 }
