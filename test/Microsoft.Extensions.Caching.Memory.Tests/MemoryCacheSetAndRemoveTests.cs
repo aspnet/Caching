@@ -611,6 +611,20 @@ namespace Microsoft.Extensions.Caching.Memory
             Assert.Throws<ArgumentNullException>(() => cache.TryGetValue(null,out long result));
         }
 
+        [Fact]
+        public void GetOrCreateFromCacheWithNullKeyThrows()
+        {
+            var cache = CreateCache();
+            Assert.Throws<ArgumentNullException>(() => cache.GetOrCreate<object>(null, null))
+;       }
+
+        [Fact]
+        public async Task GetOrCreateAsyncFromCacheWithNullKeyThrows()
+        {
+            var cache = CreateCache();
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await cache.GetOrCreateAsync<object>(null, null));
+        }
+
         private class TestKey
         {
             public override bool Equals(object obj) => true;
