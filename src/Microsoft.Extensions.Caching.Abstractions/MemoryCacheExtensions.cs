@@ -17,14 +17,12 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Get<TItem>(this IMemoryCache cache, object key)
         {
-            cache.TryGetValue<TItem>(key, out TItem value);
+            cache.TryGetValue(key, out TItem value);
             return value;
         }
 
         public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, out TItem value)
         {
-            ValidateCacheKey(key);
-
             if (cache.TryGetValue(key, out object result))
             {
                 value = (TItem)result;
@@ -73,8 +71,6 @@ namespace Microsoft.Extensions.Caching.Memory
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken)
         {
             ValidateCacheKey(key);
-
-            ValidateChangeToken(expirationToken);
 
             var entry = cache.CreateEntry(key);
             entry.AddExpirationToken(expirationToken);
@@ -139,14 +135,6 @@ namespace Microsoft.Extensions.Caching.Memory
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
-            }
-        }
-
-        private static void ValidateChangeToken(IChangeToken expirationToken)
-        {
-            if (expirationToken == null)
-            {
-                throw new ArgumentNullException(nameof(expirationToken));
             }
         }
         #endregion
