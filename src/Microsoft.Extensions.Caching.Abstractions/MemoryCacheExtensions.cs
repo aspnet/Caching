@@ -35,8 +35,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value)
         {
-            ValidateCacheKey(key);
-
             var entry = cache.CreateEntry(key);
             entry.Value = value;
             entry.Dispose();
@@ -46,8 +44,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, DateTimeOffset absoluteExpiration)
         {
-            ValidateCacheKey(key);
-
             var entry = cache.CreateEntry(key);
             entry.AbsoluteExpiration = absoluteExpiration;
             entry.Value = value;
@@ -58,8 +54,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, TimeSpan absoluteExpirationRelativeToNow)
         {
-            ValidateCacheKey(key);
-
             var entry = cache.CreateEntry(key);
             entry.AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;
             entry.Value = value;
@@ -70,8 +64,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken)
         {
-            ValidateCacheKey(key);
-
             var entry = cache.CreateEntry(key);
             entry.AddExpirationToken(expirationToken);
             entry.Value = value;
@@ -82,8 +74,6 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, MemoryCacheEntryOptions options)
         {
-            ValidateCacheKey(key);
-
             using (var entry = cache.CreateEntry(key))
             {
                 if (options != null)
@@ -128,15 +118,5 @@ namespace Microsoft.Extensions.Caching.Memory
 
             return (TItem)result;
         }
-
-        #region Private Members
-        private static void ValidateCacheKey(object key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-        }
-        #endregion
     }
 }
