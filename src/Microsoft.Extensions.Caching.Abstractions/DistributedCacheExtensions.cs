@@ -159,5 +159,42 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
             return Encoding.UTF8.GetString(data, 0, data.Length);
         }
+
+
+        public async static Task SetAsync<T>(this IDistributedCache distributedCache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
+        {
+            byte[] byteArray=null;
+            if (obj == null)
+            {
+                return null;
+            }
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(memoryStream, obj);
+                byteArray= memoryStream.ToArray();
+            }
+            await distributedCache.SetAsync(key, byteArray, options, token);
+        }
+
+        public async static Task<T> GetAsync<T>(this IDistributedCache distributedCache, string key, CancellationToken token = default(CancellationToken)) where T : class
+        {
+            var result = await distributedCache.GetAsync(key, token);
+            T resultObject = null;
+
+            if (byteArray == null)
+            {
+                resultObject= default(T);
+            }
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream(byteArray))
+            {
+                resultObject= binaryFormatter.Deserialize(memoryStream) as T;
+            }
+
+
+            return resultObject;
+        }
+
     }
 }
