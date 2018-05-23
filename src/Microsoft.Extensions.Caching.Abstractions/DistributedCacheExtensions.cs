@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,6 +57,38 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
 
             return cache.SetAsync(key, value, new DistributedCacheEntryOptions(), token);
+        }
+
+        /// <summary>
+        /// Asynchronously sets an object of T instance as sequence of bytes in the specified cache with the specified key.
+        /// </summary>
+        /// <typeparam name="T">Type of object which will be stored in the specified cache.</typeparam>
+        /// <param name="cache">The cache in which to store the data.</param>
+        /// <param name="key">The key to store the data in.</param>
+        /// <param name="value">The data to store in the cache.</param>
+        /// <param name="options">Optional. A <see cref="DistributedCacheEntryOptions" /> to set entry expiration options.</param>
+        /// <param name="token">Optional. A <see cref="CancellationToken" /> to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous set operation</returns>
+        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="key"/> or <paramref name="value"/> is null.</exception>
+        public async static Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options= default(DistributedCacheEntryOptions), CancellationToken token = default(CancellationToken))
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            byte[] byteArray = null;
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(memoryStream, value);
+                byteArray = memoryStream.ToArray();
+            }
+           await cache.SetAsync(key, byteArray, options, token);
         }
 
         /// <summary>
@@ -160,39 +194,28 @@ namespace Microsoft.Extensions.Caching.Distributed
             return Encoding.UTF8.GetString(data, 0, data.Length);
         }
 
-
-        public async static Task SetAsync<T>(this IDistributedCache distributedCache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Asynchronously gets an instance of T from the specified cache with the specified key.
+        /// </summary>
+        /// <typeparam name="T">Type of instance that is expected to be returned from the cache</typeparam>
+        /// <param name="cache">The cache in which to store the data.</param>
+        /// <param name="key">The key to get the stored data for.</param>
+        /// <param name="token">Optional. A <see cref="CancellationToken" /> to cancel the operation.</param>
+        /// <returns>>A task that gets the object of T value from the stored cache key.</returns>
+        public async static Task<T> GetAsync<T>(this IDistributedCache cache, string key, CancellationToken token = default(CancellationToken)) where T : class
         {
-            byte[] byteArray=null;
-            if (obj == null)
-            {
-                return null;
-            }
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, obj);
-                byteArray= memoryStream.ToArray();
-            }
-            await distributedCache.SetAsync(key, byteArray, options, token);
-        }
-
-        public async static Task<T> GetAsync<T>(this IDistributedCache distributedCache, string key, CancellationToken token = default(CancellationToken)) where T : class
-        {
-            var result = await distributedCache.GetAsync(key, token);
+            var value = await cache.GetAsync(key, token);
             T resultObject = null;
 
-            if (byteArray == null)
+            if (value == null)
             {
                 resultObject= default(T);
             }
             BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream(byteArray))
+            using (MemoryStream memoryStream = new MemoryStream(value))
             {
                 resultObject= binaryFormatter.Deserialize(memoryStream) as T;
             }
-
-
             return resultObject;
         }
 
