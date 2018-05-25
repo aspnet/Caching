@@ -17,8 +17,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         public static TItem Get<TItem>(this IMemoryCache cache, object key)
         {
-            cache.TryGetValue(key, out TItem value);
-            return value;
+            return (TItem)cache.Get(key);
         }
 
         public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, out TItem value)
