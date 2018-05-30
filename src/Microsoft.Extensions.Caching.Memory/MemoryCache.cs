@@ -267,6 +267,18 @@ namespace Microsoft.Extensions.Caching.Memory
             StartScanForExpiredItems();
         }
 
+        public bool Contains(object key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            CheckDisposed();
+
+            return _entries.ContainsKey(key);
+        }
+
         private void RemoveEntry(CacheEntry entry)
         {
             if (EntriesCollection.Remove(new KeyValuePair<object, CacheEntry>(entry.Key, entry)))

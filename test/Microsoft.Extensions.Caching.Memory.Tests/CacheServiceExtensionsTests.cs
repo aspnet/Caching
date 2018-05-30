@@ -116,6 +116,11 @@ namespace Microsoft.Extensions.Caching.Distributed
                 throw new NotImplementedException();
             }
 
+            public bool Contains(object key)
+            {
+                throw new NotImplementedException();
+            }
+
             public bool TryGetValue(object key, out object value)
             {
                 throw new NotImplementedException();
