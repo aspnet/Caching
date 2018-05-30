@@ -120,5 +120,10 @@ namespace Microsoft.Extensions.Caching.Memory
 
             return (TItem)result;
         }
+
+        public static bool Contains(this IMemoryCache cache, object key)
+        {
+            return cache.Contains(key);
+        }
     }
 }

@@ -30,5 +30,12 @@ namespace Microsoft.Extensions.Caching.Memory
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
         void Remove(object key);
+
+        /// <summary>
+        /// Key exist in the cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        bool Contains(object key);
     }
 }
