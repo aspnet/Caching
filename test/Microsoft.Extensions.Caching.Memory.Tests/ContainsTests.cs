@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.Caching.Memory.Tests
             cache.Remove("key");
             var result = cache.Contains("key");
 
-            Assert.True(result);
+            Assert.False(result);
         }
     }
 }
