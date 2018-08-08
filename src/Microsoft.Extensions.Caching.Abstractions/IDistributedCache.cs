@@ -32,7 +32,6 @@ namespace Microsoft.Extensions.Caching.Distributed
         /// <param name="key">A string identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="options">The cache options for the value.</param>
-        /// <returns>The located value or null.</returns>
         void Set(string key, byte[] value, DistributedCacheEntryOptions options);
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         /// <summary>
         /// Refreshes a value in the cache based on its key, resetting its sliding expiration timeout (if any).
         /// </summary>
-        /// <param name="key">A string identifying the requested entry.</param>
+        /// <param name="key">A string identifying the requested calue.</param>
         void Refresh(string key);
 
         /// <summary>

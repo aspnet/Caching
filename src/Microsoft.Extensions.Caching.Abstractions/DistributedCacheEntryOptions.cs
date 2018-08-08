@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Extensions.Caching.Distributed
 {
     /// <summary>
-    /// Represents the cache options applied to an entries of the <see cref="IDistributedCache"/> instance.
+    /// Represents the cache options applied to an entry of the <see cref="IDistributedCache"/> instance.
     /// </summary>
     public class DistributedCacheEntryOptions
     {
