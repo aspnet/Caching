@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Extension methods for setting up Redis distributed cache related services in an <see cref="IServiceCollection" />.
     /// </summary>
-    public static class RedisCacheServiceCollectionExtensions
+    public static class StackExchangeRedisCacheServiceCollectionExtensions
     {
         /// <summary>
         /// Adds Redis distributed caching services to the specified <see cref="IServiceCollection" />.
