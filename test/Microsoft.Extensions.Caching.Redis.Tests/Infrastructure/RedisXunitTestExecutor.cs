@@ -6,7 +6,7 @@
 //using Xunit.Abstractions;
 //using Xunit.Sdk;
 
-//namespace Microsoft.Extensions.Caching.StackExchangeRedis
+//namespace Microsoft.Extensions.Caching.Redis
 //{
     // TODO - should replace this whole approach with a CollectionFixture when
     // Xunit CollectionFixtures are working correctly.

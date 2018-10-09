@@ -6,9 +6,9 @@
 //using Xunit.Abstractions;
 //using Xunit.Sdk;
 
-// TODO: Disabled due to CI failures. [assembly: TestFramework("Microsoft.Extensions.Cache.Redis.RedisXunitTestFramework", "Microsoft.Extensions.Cache.StackExchangeRedis.Tests")]
+// TODO: Disabled due to CI failures. [assembly: TestFramework("Microsoft.Extensions.Cache.Redis.RedisXunitTestFramework", "Microsoft.Extensions.Cache.Redis.Tests")]
 
-//namespace Microsoft.Extensions.Caching.StackExchangeRedis
+//namespace Microsoft.Extensions.Caching.Redis
 //{
 //    public class RedisXunitTestFramework : XunitTestFramework
 //    {

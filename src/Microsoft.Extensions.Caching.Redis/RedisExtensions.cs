@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace Microsoft.Extensions.Caching.StackExchangeRedis
+namespace Microsoft.Extensions.Caching.Redis
 {
     internal static class RedisExtensions
     {

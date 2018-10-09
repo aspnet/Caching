@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.Extensions.Caching.StackExchangeRedis.Test\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.Extensions.Caching.Redis\Microsoft.Extensions.Caching.Redis.csproj" />
   </ItemGroup>
 

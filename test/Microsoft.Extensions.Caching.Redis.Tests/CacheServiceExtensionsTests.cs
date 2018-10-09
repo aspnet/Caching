@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Extensions.Caching.StackExchangeRedis
+namespace Microsoft.Extensions.Caching.Redis
 {
     public class CacheServiceExtensionsTests
     {
@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
             var services = new ServiceCollection();
 
             // Act
-            services.AddDistributedStackExchangeRedisCache(options => { });
+            services.AddDistributedRedisCache(options => { });
 
             // Assert
             var distributedCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IDistributedCache));
@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
             services.AddScoped(typeof(IDistributedCache), sp => Mock.Of<IDistributedCache>());
 
             // Act
-            services.AddDistributedStackExchangeRedisCache(options => { });
+            services.AddDistributedRedisCache(options => { });
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
         {
             var services = new ServiceCollection();
 
-            Assert.Same(services, services.AddDistributedStackExchangeRedisCache(_ => { }));
+            Assert.Same(services, services.AddDistributedRedisCache(_ => { }));
         }
     }
 }

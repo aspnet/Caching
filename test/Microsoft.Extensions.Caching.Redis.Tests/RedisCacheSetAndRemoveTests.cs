@@ -6,7 +6,7 @@ using System.Threading;
 using Microsoft.Extensions.Caching.Distributed;
 using Xunit;
 
-namespace Microsoft.Extensions.Caching.StackExchangeRedis
+namespace Microsoft.Extensions.Caching.Redis
 {
     public class RedisCacheSetAndRemoveTests
     {
