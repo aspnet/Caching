@@ -15,13 +15,13 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
     public class CacheServiceExtensionsTests
     {
         [Fact]
-        public void AddDistributedRedisCache_RegistersDistributedCacheAsSingleton()
+        public void AddStackExchangeRedisCache_RegistersDistributedCacheAsSingleton()
         {
             // Arrange
             var services = new ServiceCollection();
 
             // Act
-            services.AddDistributedStackExchangeRedisCache(options => { });
+            services.AddStackExchangeRedisCache(options => { });
 
             // Assert
             var distributedCache = services.FirstOrDefault(desc => desc.ServiceType == typeof(IDistributedCache));
@@ -31,14 +31,14 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
         }
 
         [Fact]
-        public void AddDistributedRedisCache_ReplacesPreviouslyUserRegisteredServices()
+        public void AddStackExchangeRedisCache_ReplacesPreviouslyUserRegisteredServices()
         {
             // Arrange
             var services = new ServiceCollection();
             services.AddScoped(typeof(IDistributedCache), sp => Mock.Of<IDistributedCache>());
 
             // Act
-            services.AddDistributedStackExchangeRedisCache(options => { });
+            services.AddStackExchangeRedisCache(options => { });
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
@@ -51,11 +51,11 @@ namespace Microsoft.Extensions.Caching.StackExchangeRedis
         }
 
         [Fact]
-        public void AddDistributedRedisCache_allows_chaining()
+        public void AddStackExchangeRedisCache_allows_chaining()
         {
             var services = new ServiceCollection();
 
-            Assert.Same(services, services.AddDistributedStackExchangeRedisCache(_ => { }));
+            Assert.Same(services, services.AddStackExchangeRedisCache(_ => { }));
         }
     }
 }

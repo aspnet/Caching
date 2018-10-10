@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="setupAction">An <see cref="Action{RedisCacheOptions}"/> to configure the provided
         /// <see cref="RedisCacheOptions"/>.</param>
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
-        public static IServiceCollection AddDistributedStackExchangeRedisCache(this IServiceCollection services, Action<RedisCacheOptions> setupAction)
+        public static IServiceCollection AddStackExchangeRedisCache(this IServiceCollection services, Action<RedisCacheOptions> setupAction)
         {
             if (services == null)
             {
