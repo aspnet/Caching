@@ -6,11 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory.Infrastructure;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging.Testing;
 using Xunit;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    public class CapacityTests
+    public class CapacityTests : LoggedTestBase
     {
         [Fact]
         public void MemoryDistributedCacheOptionsDefaultsTo200MBSizeLimit()
@@ -116,6 +117,8 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 SizeLimit = long.MaxValue
             });
+
+            cache.Logger = Logger;
 
             var entryOptions = new MemoryCacheEntryOptions { Size = long.MaxValue };
             var sem = new SemaphoreSlim(0, 1);
